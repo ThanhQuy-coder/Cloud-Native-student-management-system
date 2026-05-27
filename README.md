@@ -1,2 +1,23 @@
-# Cloud-Native-student-management-system
-This is a cloud computing subject project created and developed by a group of 8 UTH students
+# Student Management Cloud-Native System
+
+## Technologies
+
+- ASP.NET Core Web API
+- MySQL
+- Docker
+- AWS/Azure/GCP VM
+
+## Features
+
+- Student management
+- Class management
+- Subject management
+- Enrollment
+- Grade management
+- Authentication
+
+## Deployment
+
+- Local
+- Docker
+- Cloud VM
