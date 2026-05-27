@@ -1,0 +1,37 @@
+export const C = {
+    navy: "#0F2D5E",
+    navyHover: "#1E4D8C",
+    activeBg: "#E8F0FE",
+    pageBg: "#F5F7FA",
+    textPrimary: "#1A1A2E",
+    textSecondary: "#6B7280",
+    white: "#ffffff",
+    border: "#E5E7EB",
+    info: "#3B82F6",
+    success: "#10B981",
+    danger: "#EF4444",
+    warning: "#F59E0B",
+    teal: "#0D9488",
+    card: "#ffffff",
+};
+
+export const s: Record<string, any> = {
+    page: { background: C.pageBg, minHeight: "100vh", fontFamily: "'Inter', sans-serif", fontSize: 14, color: C.textPrimary },
+    card: { background: C.white, borderRadius: 12, boxShadow: "0 1px 4px rgba(0,0,0,0.08)", padding: "24px" },
+    btn: (variant: "primary" | "outline" | "danger" | "ghost" = "primary") => ({
+        primary: { background: C.navy, color: C.white, border: "none", borderRadius: 8, padding: "8px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 500 },
+        outline: { background: "transparent", color: C.navy, border: `1.5px solid ${C.navy}`, borderRadius: 8, padding: "8px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 500 },
+        danger: { background: C.danger, color: C.white, border: "none", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13, fontWeight: 500 },
+        ghost: { background: "transparent", color: C.textSecondary, border: "none", borderRadius: 8, padding: "6px 8px", cursor: "pointer", display: "flex", alignItems: "center" },
+    }[variant]),
+    input: { border: `1.5px solid ${C.border}`, borderRadius: 8, padding: "8px 12px", fontSize: 13, outline: "none", background: C.white, color: C.textPrimary, width: "100%" },
+    select: { border: `1.5px solid ${C.border}`, borderRadius: 8, padding: "8px 12px", fontSize: 13, outline: "none", background: C.white, color: C.textPrimary },
+    table: { width: "100%", borderCollapse: "collapse", fontSize: 13 },
+    th: { padding: "10px 12px", textAlign: "left", borderBottom: `2px solid ${C.border}`, color: C.textSecondary, fontWeight: 600, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.04em" },
+    td: { padding: "10px 12px", borderBottom: `1px solid ${C.border}`, color: C.textPrimary, verticalAlign: "middle" },
+    label: { display: "block", marginBottom: 6, fontSize: 13, fontWeight: 500, color: C.textPrimary },
+    formGroup: { marginBottom: 16 },
+    pageHeader: { marginBottom: 24 },
+    pageTitle: { fontSize: 20, fontWeight: 700, color: C.textPrimary, margin: 0 },
+    pageSub: { fontSize: 13, color: C.textSecondary, margin: "4px 0 0" },
+};
