@@ -1,0 +1,116 @@
+# =========================
+# .NET / ASP.NET Core
+# =========================
+
+bin/
+obj/
+
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Visual Studio
+.vs/
+
+# Logs
+*.log
+
+# ASP.NET Core
+appsettings.Development.json
+
+# User Secrets
+secrets.json
+
+# EF Core
+Migrations/*.Designer.cs
+
+# Publish
+publish/
+
+# NuGet
+*.nupkg
+packages/
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+
+# SQL Server LocalDB
+*.mdf
+*.ldf
+
+# =========================
+# React / Vite
+# =========================
+
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Env files
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.production.local
+
+# npm/yarn/pnpm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Docker
+# =========================
+
+*.tar
+
+# Docker Compose override
+docker-compose.override.yml
+
+# =========================
+# OS Files
+# =========================
+
+.DS_Store
+Thumbs.db
+
+# =========================
+# Temporary files
+# =========================
+
+*.tmp
+*.temp
+*.cache
+
+# =========================
+# JetBrains
+# =========================
+
+*.iml
+
+# =========================
+# Coverage
+# =========================
+
+coverage/
+TestResults/
+
+# =========================
+# Optional
+# =========================
+
+.env
+.env.*
