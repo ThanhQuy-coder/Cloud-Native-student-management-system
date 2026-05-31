@@ -23,11 +23,35 @@ namespace StudentManagement.Infrastructure.Configurations
 
             builder.Property(x => x.TotalScore)
                 .HasPrecision(4, 2)
-                .ValueGeneratedOnAddOrUpdate();
+                .ValueGeneratedOnAddOrUpdate()
+                .HasComputedColumnSql(
+                @"CASE 
+                    WHEN `ProcessScore` IS NOT NULL 
+                     AND `MidtermScore` IS NOT NULL 
+                     AND `FinalScore` IS NOT NULL
+                    THEN `ProcessScore` * 0.20 
+                       + `MidtermScore` * 0.30 
+                       + `FinalScore` * 0.50
+                    ELSE NULL
+                  END",
+                stored: true);
 
             builder.Property(x => x.GradeStatus)
                 .HasMaxLength(20)
-                .ValueGeneratedOnAddOrUpdate();
+                .ValueGeneratedOnAddOrUpdate()
+                .HasComputedColumnSql(
+                @"CASE 
+                    WHEN `ProcessScore` IS NULL 
+                      OR `MidtermScore` IS NULL 
+                      OR `FinalScore` IS NULL
+                    THEN 'Chưa có điểm'
+                    WHEN (`ProcessScore` * 0.20 
+                        + `MidtermScore` * 0.30 
+                        + `FinalScore` * 0.50) >= 4.0
+                    THEN 'Đạt'
+                    ELSE 'Rớt'
+                  END",
+                stored: true);
 
             builder.HasIndex(x => new
             {

@@ -10,4 +10,6 @@ public interface IEnrollmentRepository : IRepository<Enrollment>
     Task<IReadOnlyList<Enrollment>> GetByStudentIdAsync(int studentId);
 
     Task<IReadOnlyList<Enrollment>> GetByCourseIdAsync(int courseId);
+
+    Task<IReadOnlyList<Enrollment>> GetGradesByStudentIdAsync(int studentId);
 }

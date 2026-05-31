@@ -73,4 +73,14 @@ public class EnrollmentRepository : IEnrollmentRepository
     {
         _context.Enrollments.Remove(entity);
     }
+
+    public async Task<IReadOnlyList<Enrollment>> GetGradesByStudentIdAsync(int studentId)
+    {
+        return await _context.Enrollments
+            .Include(x => x.Student)
+            .Include(x => x.Course)
+            .Where(x => x.StudentId == studentId)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }
