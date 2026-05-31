@@ -1,5 +1,7 @@
 # Hướng dẫn chạy Backend - Student Management
 
+> Ngày cập nhật 31/05/2026
+
 ## 1. Yêu cầu môi trường
 
 Trước khi chạy backend, cần cài đặt:
@@ -70,9 +72,17 @@ Nếu có lỗi, cần đọc message trong terminal để biết project nào �
 
 ---
 
-## 5. Cấu hình connection string
+## 5. Cấu hình connection string để kết nối với Database
 
-> Đang cập nhật
+Hãy vào trong ứng dụng MySQL WorkBench và tạo một Database
+
+Sau khi tạo xong, hãy vào cho terminal vào thư mục StudentManagement thực hiện lệnh sau:
+
+```bash
+# Thay đổi các phần như your_db_name thành thông tin DB đã tạo
+# Lệnh này sẽ tạo ra một nơi lưu trữ chuỗi connection string giúp không bị lộ
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "server=localhost;port=3306;database=`your_db_name`;user=`your_user`;password=`your_password`"
+```
 
 ## 6. Cài Entity Framework Core CLI
 
