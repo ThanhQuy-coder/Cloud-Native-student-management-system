@@ -106,7 +106,7 @@ dotnet tool update --global dotnet-ef
 
 ---
 
-## 7. Tạo migration
+## 7. Tạo migration (Bỏ qua bước này vì đây dành cho việc khởi tạo do người đảm nhận nhiệm vụ backend thực hiện)
 
 Chạy lệnh trong thư mục `backend`:
 
