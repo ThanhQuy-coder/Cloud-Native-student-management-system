@@ -2,7 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Project.Application.Interfaces.Repositories;
+using Project.Infrastructure.Repositories;
+using Project.Infrastructure.Services;
 using StudentManagement.Application.Interfaces.Repositories;
+using StudentManagement.Application.Interfaces.Services;
 using StudentManagement.Infrastructure.Data;
 
 namespace StudentManagement.Infrastructure
@@ -24,6 +27,9 @@ namespace StudentManagement.Infrastructure
 
             services.AddScoped<IStudentRepository, StudentRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
 
             return services;
         }

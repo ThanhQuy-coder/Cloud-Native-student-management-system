@@ -149,6 +149,19 @@ Lệnh này sẽ tạo database và các bảng tương ứng trong MySQL.
 
 ---
 
+## 8.1. user-secrets cho JWT
+
+Mở terminal ở thư mục StudentManagement.Domain chạy lệnh sau:
+
+```bash
+# "your_super_secret_key_at_least_32_characters" đặt tùy ý
+dotnet user-secrets set "Jwt:Key" "your_super_secret_key_at_least_32_characters"
+dotnet user-secrets set "Jwt:Issuer" "StudentManagementApi"
+dotnet user-secrets set "Jwt:Audience" "StudentManagementClient"
+```
+
+Lệnh này giúp sinh mã JWT để xác thực ở backend
+
 ## 9. Chạy backend
 
 Chạy API bằng lệnh:
@@ -173,21 +186,21 @@ http://localhost:5081
 
 ---
 
-## 10. Mở Swagger
+## 10. Mở Scalar
 
 Sau khi chạy backend, mở trình duyệt và truy cập:
 
 ```text
-https://localhost:xxxx/swagger
+https://localhost:xxxx/Scalar
 ```
 
 Ví dụ:
 
 ```text
-https://localhost:7081/swagger
+https://localhost:7081/Scalar
 ```
 
-Swagger dùng để kiểm tra API trực tiếp trên trình duyệt.
+Scalar dùng để kiểm tra API trực tiếp trên trình duyệt.
 
 ---
 
@@ -214,7 +227,7 @@ dotnet run --project StudentManagement.Api
 ## Tạo migration
 
 ```bash
-dotnet ef migrations add MigrationName --project StudentManagement.Infrastructure --startup-project StudentManagement.Api
+dotnet ef migrations add `MigrationName` --project StudentManagement.Infrastructure --startup-project StudentManagement.Api
 ```
 
 Ví dụ:
