@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Project.Application.Interfaces.Repositories;
+using StudentManagement.Application.Interfaces.Repositories;
 using StudentManagement.Infrastructure.Data;
 
 namespace StudentManagement.Infrastructure
@@ -19,6 +21,9 @@ namespace StudentManagement.Infrastructure
                     connectionString,
                     ServerVersion.AutoDetect(connectionString)
                 ));
+
+            services.AddScoped<IStudentRepository, StudentRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
         }
