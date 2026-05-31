@@ -26,11 +26,10 @@ namespace StudentManagement.Infrastructure
 
             services.AddScoped<IStudentRepository, StudentRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
-
             services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IClassRepository, ClassRepository>();
 
             return services;
         }

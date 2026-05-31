@@ -7,10 +7,14 @@ public class UnitOfWork : IUnitOfWork
 
     public UnitOfWork(
         AppDbContext context,
-        IStudentRepository students, IUserRepository users, IRoleRepository roles)
+        IStudentRepository students,
+        IClassRepository classes,
+        IUserRepository users,
+        IRoleRepository roles)
     {
         _context = context;
         Students = students;
+        Classes = classes;
         Users = users;
         Roles = roles;
     }
@@ -21,7 +25,7 @@ public class UnitOfWork : IUnitOfWork
 
     public IEnrollmentRepository Enrollments => throw new NotImplementedException();
 
-    public IClassRepository Classes => throw new NotImplementedException();
+    public IClassRepository Classes { get; }
 
     public IUserRepository Users { get; }
 
