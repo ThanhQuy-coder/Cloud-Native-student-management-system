@@ -9,19 +9,21 @@ public class UnitOfWork : IUnitOfWork
         AppDbContext context,
         IStudentRepository students,
         IClassRepository classes,
+        ICourseRepository courses,
         IUserRepository users,
         IRoleRepository roles)
     {
         _context = context;
         Students = students;
         Classes = classes;
+        Courses = courses;
         Users = users;
         Roles = roles;
     }
 
     public IStudentRepository Students { get; }
 
-    public ICourseRepository Courses => throw new NotImplementedException();
+    public ICourseRepository Courses { get; }
 
     public IEnrollmentRepository Enrollments => throw new NotImplementedException();
 

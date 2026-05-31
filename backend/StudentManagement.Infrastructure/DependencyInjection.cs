@@ -30,6 +30,7 @@ namespace StudentManagement.Infrastructure
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IClassRepository, ClassRepository>();
+            services.AddScoped<ICourseRepository, CourseRepository>();
 
             return services;
         }
