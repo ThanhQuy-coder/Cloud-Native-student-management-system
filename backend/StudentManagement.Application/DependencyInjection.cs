@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Project.Application.Services;
+using StudentManagement.Application.Services;
 using StudentManagement.Application.Interfaces.Services;
 
 public static class DependencyInjection

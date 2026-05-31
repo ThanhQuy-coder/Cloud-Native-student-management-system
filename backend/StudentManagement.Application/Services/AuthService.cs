@@ -4,7 +4,7 @@ using StudentManagement.Application.Interfaces.Repositories;
 using StudentManagement.Application.Interfaces.Services;
 using StudentManagement.Domain.Entities;
 
-namespace Project.Application.Services;
+namespace StudentManagement.Application.Services;
 
 public class AuthService : IAuthService
 {
@@ -56,10 +56,15 @@ public class AuthService : IAuthService
         if (existedUser is not null)
             return null;
 
+        var defaultRole = await _unitOfWork.Roles.GetByRoleNameAsync("Student");
+
+        if (defaultRole is null)
+            throw new Exception("Default role 'Student' chưa tồn tại trong database.");
+
         var user = new User
         {
             Username = dto.Username,
-            RoleId = dto.RoleId,
+            RoleId = defaultRole.Id,
             IsActive = true
         };
 

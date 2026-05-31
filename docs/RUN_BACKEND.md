@@ -154,7 +154,7 @@ Lệnh này sẽ tạo database và các bảng tương ứng trong MySQL.
 Mở terminal ở thư mục StudentManagement.Domain chạy lệnh sau:
 
 ```bash
-# "your_super_secret_key_at_least_32_characters" đặt tùy ý
+# "your_super_secret_key_at_least_32_characters" đặt tùy ý nhưng phải đủ hoặc hơn 32 ký tự
 dotnet user-secrets set "Jwt:Key" "your_super_secret_key_at_least_32_characters"
 dotnet user-secrets set "Jwt:Issuer" "StudentManagementApi"
 dotnet user-secrets set "Jwt:Audience" "StudentManagementClient"
@@ -191,13 +191,13 @@ http://localhost:5081
 Sau khi chạy backend, mở trình duyệt và truy cập:
 
 ```text
-https://localhost:xxxx/Scalar
+https://localhost:xxxx/Scalar/v1
 ```
 
 Ví dụ:
 
 ```text
-https://localhost:7081/Scalar
+https://localhost:7081/Scalar/v1
 ```
 
 Scalar dùng để kiểm tra API trực tiếp trên trình duyệt.

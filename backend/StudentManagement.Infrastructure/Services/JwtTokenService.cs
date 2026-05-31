@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using StudentManagement.Application.Interfaces.Services;
 using StudentManagement.Domain.Entities;
 
-namespace Project.Infrastructure.Services;
+namespace StudentManagement.Infrastructure.Services;
 
 public class JwtTokenService : IJwtTokenService
 {

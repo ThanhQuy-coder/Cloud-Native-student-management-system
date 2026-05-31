@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Project.Application.Interfaces.Repositories;
+using StudentManagement.Application.Interfaces.Repositories;
 using StudentManagement.Domain.Entities;
 using StudentManagement.Infrastructure.Data;
 

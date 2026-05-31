@@ -3,7 +3,7 @@ using StudentManagement.Application.Interfaces.Repositories;
 using StudentManagement.Domain.Entities;
 using StudentManagement.Infrastructure.Data;
 
-namespace Project.Infrastructure.Repositories;
+namespace StudentManagement.Infrastructure.Repositories;
 
 public class UserRepository : IUserRepository
 {

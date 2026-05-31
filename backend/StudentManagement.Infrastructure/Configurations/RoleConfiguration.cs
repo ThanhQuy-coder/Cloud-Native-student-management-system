@@ -18,6 +18,12 @@ namespace StudentManagement.Infrastructure.Configurations
 
             builder.HasIndex(x => x.RoleName)
                 .IsUnique();
+
+            builder.HasData(
+                new Role { Id = 1, RoleName = "Admin" },
+                new Role { Id = 2, RoleName = "Teacher" },
+                new Role { Id = 3, RoleName = "Student" }
+            );
         }
     }
 }

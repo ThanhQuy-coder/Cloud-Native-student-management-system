@@ -1,7 +1,6 @@
-using StudentManagement.Application.Interfaces.Repositories;
 using StudentManagement.Domain.Entities;
 
-namespace Project.Application.Interfaces.Repositories;
+namespace StudentManagement.Application.Interfaces.Repositories;
 
 public interface IStudentRepository : IRepository<Student>
 {

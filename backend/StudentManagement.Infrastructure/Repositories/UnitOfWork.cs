@@ -1,4 +1,3 @@
-using Project.Application.Interfaces.Repositories;
 using StudentManagement.Application.Interfaces.Repositories;
 using StudentManagement.Infrastructure.Data;
 
@@ -8,11 +7,12 @@ public class UnitOfWork : IUnitOfWork
 
     public UnitOfWork(
         AppDbContext context,
-        IStudentRepository students, IUserRepository users)
+        IStudentRepository students, IUserRepository users, IRoleRepository roles)
     {
         _context = context;
         Students = students;
         Users = users;
+        Roles = roles;
     }
 
     public IStudentRepository Students { get; }
@@ -25,7 +25,7 @@ public class UnitOfWork : IUnitOfWork
 
     public IUserRepository Users { get; }
 
-    public IRoleRepository Roles => throw new NotImplementedException();
+    public IRoleRepository Roles { get; }
 
     public async Task<int> SaveChangesAsync()
     {

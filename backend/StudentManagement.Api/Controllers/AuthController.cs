@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using StudentManagement.Application.DTOs.Auth;
 using StudentManagement.Application.Interfaces.Services;
 
-namespace Project.Api.Controllers;
+namespace StudentManagement.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]

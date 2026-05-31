@@ -1,4 +1,4 @@
-using Project.Application.Interfaces.Repositories;
+using StudentManagement.Application.Interfaces.Repositories;
 
 namespace StudentManagement.Application.Interfaces.Repositories;
 
