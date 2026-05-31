@@ -10,6 +10,7 @@ public class UnitOfWork : IUnitOfWork
         IStudentRepository students,
         IClassRepository classes,
         ICourseRepository courses,
+        IEnrollmentRepository enrollments,
         IUserRepository users,
         IRoleRepository roles)
     {
@@ -17,6 +18,7 @@ public class UnitOfWork : IUnitOfWork
         Students = students;
         Classes = classes;
         Courses = courses;
+        Enrollments = enrollments;
         Users = users;
         Roles = roles;
     }
@@ -25,7 +27,7 @@ public class UnitOfWork : IUnitOfWork
 
     public ICourseRepository Courses { get; }
 
-    public IEnrollmentRepository Enrollments => throw new NotImplementedException();
+    public IEnrollmentRepository Enrollments { get; }
 
     public IClassRepository Classes { get; }
 

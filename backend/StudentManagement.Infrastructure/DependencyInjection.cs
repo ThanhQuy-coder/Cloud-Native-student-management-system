@@ -31,6 +31,7 @@ namespace StudentManagement.Infrastructure
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IClassRepository, ClassRepository>();
             services.AddScoped<ICourseRepository, CourseRepository>();
+            services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 
             return services;
         }
