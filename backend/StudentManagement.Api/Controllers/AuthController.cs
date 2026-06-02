@@ -15,6 +15,17 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
+    /// <summary>
+    /// Authenticates a user and returns a JWT token upon successful login.
+    /// </summary>
+    /// <param name="dto">
+    /// Login credentials containing the username and password.
+    /// </param>
+    /// <returns>
+    /// Returns the authenticated user's information, including:
+    /// UserId, Username, RoleName, and JWT Token.
+    /// Returns 401 Unauthorized if the credentials are invalid.
+    /// </returns>
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto dto)
     {
@@ -26,6 +37,17 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>
+    /// Registers a new user and returns an authentication token.
+    /// </summary>
+    /// <param name="dto">
+    /// Registration information containing the username and password.
+    /// </param>
+    /// <returns>
+    /// Returns the newly created user's information, including:
+    /// UserId, Username, RoleName, and JWT Token.
+    /// Returns an error if the username already exists.
+    /// </returns>
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDto dto)
     {

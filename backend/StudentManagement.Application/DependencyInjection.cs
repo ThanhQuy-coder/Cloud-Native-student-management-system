@@ -4,6 +4,8 @@ using StudentManagement.Application.Interfaces.Services;
 
 public static class DependencyInjection
 {
+    // Registers application-level services for dependency injection.
+    // Includes business logic services such as Student, Auth, Class, Course, Enrollment, and Grade.
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<IStudentService, StudentService>();

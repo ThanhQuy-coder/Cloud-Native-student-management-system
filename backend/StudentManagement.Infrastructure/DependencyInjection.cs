@@ -11,6 +11,8 @@ namespace StudentManagement.Infrastructure
 {
     public static class DependencyInjection
     {
+        // Registers infrastructure services and repositories for dependency injection.
+        // Includes DbContext setup with MySQL and scoped services for repositories and JWT token service.
         public static IServiceCollection AddInfrastructure(
             this IServiceCollection services,
             IConfiguration configuration
@@ -18,12 +20,14 @@ namespace StudentManagement.Infrastructure
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
+            // Configure EF Core DbContext with MySQL provider
             services.AddDbContext<AppDbContext>(options =>
                 options.UseMySql(
                     connectionString,
                     ServerVersion.AutoDetect(connectionString)
                 ));
 
+            // Register repositories and services for DI
             services.AddScoped<IStudentRepository, StudentRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserRepository, UserRepository>();

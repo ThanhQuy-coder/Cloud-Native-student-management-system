@@ -4,6 +4,13 @@ using StudentManagement.Domain.Entities;
 
 namespace StudentManagement.Infrastructure.Configurations;
 
+/// <summary>
+/// Defines the entity configuration for the <see cref="User"/> entity in the database.
+/// This file maps the User entity to the "users" table, sets primary keys, 
+/// configures property constraints (length, required fields, default values), 
+/// enforces a unique index on Username, and establishes the relationship 
+/// between users and roles with restricted delete behavior.
+/// </summary>
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)

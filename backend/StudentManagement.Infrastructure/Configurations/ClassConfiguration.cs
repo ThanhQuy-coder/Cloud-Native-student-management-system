@@ -4,6 +4,11 @@ using StudentManagement.Domain.Entities;
 
 namespace StudentManagement.Infrastructure.Configurations
 {
+    /// <summary>
+    /// Defines the entity configuration for the <see cref="Class"/> entity in the database.
+    /// This file maps the Class entity to the "classes" table, sets primary keys, 
+    /// configures property constraints (length and required fields), and enforces a unique index on ClassCode.
+    /// </summary>
     public class ClassConfiguration : IEntityTypeConfiguration<Class>
     {
         public void Configure(EntityTypeBuilder<Class> builder)

@@ -20,6 +20,23 @@ public class AuthService : IAuthService
         _jwtTokenService = jwtTokenService;
     }
 
+    /// <summary>
+    /// Authenticates a user by verifying their credentials and generates a JWT token if valid.
+    /// </summary>
+    /// <param name="dto">
+    /// The data transfer object (<see cref="LoginDto"/>) containing the username and password
+    /// for login.
+    /// </param>
+    /// <returns>
+    /// An <see cref="AuthDto"/> object containing:
+    /// <list type="bullet">
+    ///   <item><description>UserId</description></item>
+    ///   <item><description>Username</description></item>
+    ///   <item><description>RoleName</description></item>
+    ///   <item><description>Token</description></item>
+    /// </list>
+    /// Returns null if the user does not exist, is inactive, or the password verification fails.
+    /// </returns>
     public async Task<AuthDto?> LoginAsync(LoginDto dto)
     {
         var user = await _unitOfWork.Users.GetByUsernameAsync(dto.Username);
@@ -49,6 +66,24 @@ public class AuthService : IAuthService
         };
     }
 
+    /// <summary>
+    /// Registers a new user with the default "Student" role and generates a JWT token.
+    /// </summary>
+    /// <param name="dto">
+    /// The data transfer object (<see cref="RegisterDto"/>) containing the username and password
+    /// for registration.
+    /// </param>
+    /// <returns>
+    /// An <see cref="AuthDto"/> object representing the newly registered user, including:
+    /// <list type="bullet">
+    ///   <item><description>UserId</description></item>
+    ///   <item><description>Username</description></item>
+    ///   <item><description>RoleName</description></item>
+    ///   <item><description>Token</description></item>
+    /// </list>
+    /// Returns null if the username already exists.  
+    /// Throws an exception if the default "Student" role does not exist in the database.
+    /// </returns>
     public async Task<AuthDto?> RegisterAsync(RegisterDto dto)
     {
         var existedUser = await _unitOfWork.Users.GetByUsernameAsync(dto.Username);

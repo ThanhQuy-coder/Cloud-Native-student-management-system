@@ -14,6 +14,27 @@ public class EnrollmentService : IEnrollmentService
         _unitOfWork = unitOfWork;
     }
 
+    /// <summary>
+    /// Creates a new enrollment record for a student in a subject.
+    /// </summary>
+    /// <param name="dto">
+    /// The data transfer object (<see cref="CreateEnrollmentDto"/>) containing the details
+    /// required to create a new enrollment.
+    /// </param>
+    /// <returns>
+    /// An <see cref="EnrollmentDto"/> object representing the newly created enrollment, including:
+    /// <list type="bullet">
+    ///   <item><description>Id</description></item>
+    ///   <item><description>StudentId</description></item>
+    ///   <item><description>StudentCode</description></item>
+    ///   <item><description>StudentName</description></item>
+    ///   <item><description>SubjectId</description></item>
+    ///   <item><description>SubjectCode</description></item>
+    ///   <item><description>SubjectName</description></item>
+    ///   <item><description>Credits</description></item>
+    /// </list>
+    /// Throws an exception if the student or subject does not exist, or if the student is already enrolled in the subject.
+    /// </returns>
     public async Task<EnrollmentDto> CreateAsync(CreateEnrollmentDto dto)
     {
         var student = await _unitOfWork.Students.GetByIdAsync(dto.StudentId);
@@ -56,6 +77,24 @@ public class EnrollmentService : IEnrollmentService
         };
     }
 
+    /// <summary>
+    /// Retrieves all subjects that a student is enrolled in by their unique identifier.
+    /// </summary>
+    /// <param name="studentId">The unique integer identifier of the student.</param>
+    /// <returns>
+    /// A <see cref="IReadOnlyList{T}"/> of <see cref="EnrollmentDto"/> objects, each containing:
+    /// <list type="bullet">
+    ///   <item><description>Id</description></item>
+    ///   <item><description>StudentId</description></item>
+    ///   <item><description>StudentCode</description></item>
+    ///   <item><description>StudentName</description></item>
+    ///   <item><description>SubjectId</description></item>
+    ///   <item><description>SubjectCode</description></item>
+    ///   <item><description>SubjectName</description></item>
+    ///   <item><description>Credits</description></item>
+    /// </list>
+    /// Throws an exception if the student does not exist.
+    /// </returns>
     public async Task<IReadOnlyList<EnrollmentDto>> GetSubjectsByStudentIdAsync(int studentId)
     {
         var student = await _unitOfWork.Students.GetByIdAsync(studentId);
@@ -78,6 +117,17 @@ public class EnrollmentService : IEnrollmentService
         }).ToList();
     }
 
+    /// <summary>
+    /// Deletes an existing enrollment record by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique integer identifier of the enrollment to delete.</param>
+    /// <returns>
+    /// A boolean value indicating the result of the delete operation:
+    /// <list type="bullet">
+    ///   <item><description>true — if the enrollment record was successfully deleted</description></item>
+    ///   <item><description>false — if no enrollment record was found with the given id</description></item>
+    /// </list>
+    /// </returns>
     public async Task<bool> DeleteAsync(int id)
     {
         var enrollment = await _unitOfWork.Enrollments.GetByIdAsync(id);

@@ -13,6 +13,24 @@ public class StudentsController : ControllerBase
         _studentService = studentService;
     }
 
+    /// <summary>
+    /// Retrieves all student records from the system.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="List{T}"/> of <see cref="StudentDto"/> objects, each containing:
+    /// <list type="bullet">
+    ///   <item><description>Id</description></item>
+    ///   <item><description>StudentCode</description></item>
+    ///   <item><description>FullName</description></item>
+    ///   <item><description>Email</description></item>
+    ///   <item><description>Dob</description></item>
+    ///   <item><description>Gender</description></item>
+    ///   <item><description>Phone</description></item>
+    ///   <item><description>ClassId</description></item>
+    ///   <item><description>ClassName</description></item>
+    ///   <item><description>LearningStatus</description></item>
+    /// </list>
+    /// </returns>
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -20,6 +38,26 @@ public class StudentsController : ControllerBase
         return Ok(students);
     }
 
+    /// <summary>
+    /// Retrieves a single student record by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique integer identifier of the student.</param>
+    /// <returns>
+    /// A <see cref="StudentDto"/> object containing:
+    /// <list type="bullet">
+    ///   <item><description>Id</description></item>
+    ///   <item><description>StudentCode</description></item>
+    ///   <item><description>FullName</description></item>
+    ///   <item><description>Email</description></item>
+    ///   <item><description>Dob</description></item>
+    ///   <item><description>Gender</description></item>
+    ///   <item><description>Phone</description></item>
+    ///   <item><description>ClassId</description></item>
+    ///   <item><description>ClassName</description></item>
+    ///   <item><description>LearningStatus</description></item>
+    /// </list>
+    /// If no student is found with the given id, returns a NotFound result.
+    /// </returns>
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -31,6 +69,27 @@ public class StudentsController : ControllerBase
         return Ok(student);
     }
 
+    /// <summary>
+    /// Creates a new student record in the system.
+    /// </summary>
+    /// <param name="dto">
+    /// The data transfer object (<see cref="CreateStudentDto"/>) containing the details
+    /// required to create a new student record.
+    /// </param>
+    /// <returns>
+    /// A <see cref="StudentDto"/> object representing the newly created student, including:
+    /// <list type="bullet">
+    ///   <item><description>Id</description></item>
+    ///   <item><description>StudentCode</description></item>
+    ///   <item><description>FullName</description></item>
+    ///   <item><description>Email</description></item>
+    ///   <item><description>Dob</description></item>
+    ///   <item><description>Gender</description></item>
+    ///   <item><description>Phone</description></item>
+    ///   <item><description>ClassId</description></item>
+    ///   <item><description>LearningStatus</description></item>
+    /// </list>
+    /// </returns>
     [HttpPost]
     public async Task<IActionResult> Create(CreateStudentDto dto)
     {
@@ -42,6 +101,23 @@ public class StudentsController : ControllerBase
             student);
     }
 
+    /// <summary>
+    /// Updates an existing student record by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique integer identifier of the student to update.</param>
+    /// <param name="dto">
+    /// The data transfer object (<see cref="UpdateStudentDto"/>) containing the updated
+    /// details for the student record.
+    /// </param>
+    /// <returns>
+    /// A boolean value indicating the result of the update operation:
+    /// <list type="bullet">
+    ///   <item><description>true — if the student record was successfully updated</description></item>
+    ///   <item><description>false — if no student record was found with the given id</description></item>
+    /// </list>
+    /// If the update is successful, returns a NoContent result.  
+    /// If the student is not found, returns a NotFound result.
+    /// </returns>
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateStudentDto dto)
     {
@@ -53,6 +129,19 @@ public class StudentsController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Deletes an existing student record by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique integer identifier of the student to delete.</param>
+    /// <returns>
+    /// A boolean value indicating the result of the delete operation:
+    /// <list type="bullet">
+    ///   <item><description>true — if the student record was successfully deleted</description></item>
+    ///   <item><description>false — if no student record was found with the given id</description></item>
+    /// </list>
+    /// If the deletion is successful, returns a NoContent result.  
+    /// If the student is not found, returns a NotFound result.
+    /// </returns>
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {

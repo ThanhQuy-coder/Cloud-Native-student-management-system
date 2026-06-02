@@ -12,6 +12,24 @@ public class StudentService : IStudentService
         _unitOfWork = unitOfWork;
     }
 
+    /// <summary>
+    /// Retrieves all student records from the system.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="IReadOnlyList{T}"/> of <see cref="StudentDto"/> objects, each containing:
+    /// <list type="bullet">
+    ///   <item><description>Id</description></item>
+    ///   <item><description>StudentCode</description></item>
+    ///   <item><description>FullName</description></item>
+    ///   <item><description>Email</description></item>
+    ///   <item><description>Dob</description></item>
+    ///   <item><description>Gender</description></item>
+    ///   <item><description>Phone</description></item>
+    ///   <item><description>ClassId</description></item>
+    ///   <item><description>ClassName</description></item>
+    ///   <item><description>LearningStatus</description></item>
+    /// </list>
+    /// </returns>
     public async Task<IReadOnlyList<StudentDto>> GetAllAsync()
     {
         var students = await _unitOfWork.Students.GetAllAsync();
@@ -31,6 +49,26 @@ public class StudentService : IStudentService
         }).ToList();
     }
 
+    /// <summary>
+    /// Retrieves a single student record by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique integer identifier of the student.</param>
+    /// <returns>
+    /// A <see cref="StudentDto"/> object containing:
+    /// <list type="bullet">
+    ///   <item><description>Id</description></item>
+    ///   <item><description>StudentCode</description></item>
+    ///   <item><description>FullName</description></item>
+    ///   <item><description>Email</description></item>
+    ///   <item><description>Dob</description></item>
+    ///   <item><description>Gender</description></item>
+    ///   <item><description>Phone</description></item>
+    ///   <item><description>ClassId</description></item>
+    ///   <item><description>ClassName</description></item>
+    ///   <item><description>LearningStatus</description></item>
+    /// </list>
+    /// Returns null if no student is found with the given id.
+    /// </returns>
     public async Task<StudentDto?> GetByIdAsync(int id)
     {
         var student = await _unitOfWork.Students.GetByIdAsync(id);
@@ -53,6 +91,27 @@ public class StudentService : IStudentService
         };
     }
 
+    /// <summary>
+    /// Creates a new student record in the system.
+    /// </summary>
+    /// <param name="dto">
+    /// The data transfer object (<see cref="CreateStudentDto"/>) containing the details
+    /// required to create a new student record.
+    /// </param>
+    /// <returns>
+    /// A <see cref="StudentDto"/> object representing the newly created student, including:
+    /// <list type="bullet">
+    ///   <item><description>Id</description></item>
+    ///   <item><description>StudentCode</description></item>
+    ///   <item><description>FullName</description></item>
+    ///   <item><description>Email</description></item>
+    ///   <item><description>Dob</description></item>
+    ///   <item><description>Gender</description></item>
+    ///   <item><description>Phone</description></item>
+    ///   <item><description>ClassId</description></item>
+    ///   <item><description>LearningStatus</description></item>
+    /// </list>
+    /// </returns>
     public async Task<StudentDto> CreateAsync(CreateStudentDto dto)
     {
         var student = new Student
@@ -85,6 +144,21 @@ public class StudentService : IStudentService
         };
     }
 
+    /// <summary>
+    /// Updates an existing student record by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique integer identifier of the student to update.</param>
+    /// <param name="dto">
+    /// The data transfer object (<see cref="UpdateStudentDto"/>) containing the updated
+    /// details for the student record.
+    /// </param>
+    /// <returns>
+    /// A boolean value indicating the result of the update operation:
+    /// <list type="bullet">
+    ///   <item><description>true — if the student record was successfully updated</description></item>
+    ///   <item><description>false — if no student record was found with the given id</description></item>
+    /// </list>
+    /// </returns>
     public async Task<bool> UpdateAsync(int id, UpdateStudentDto dto)
     {
         var student = await _unitOfWork.Students.GetByIdAsync(id);
@@ -106,6 +180,17 @@ public class StudentService : IStudentService
         return true;
     }
 
+    /// <summary>
+    /// Deletes an existing student record by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique integer identifier of the student to delete.</param>
+    /// <returns>
+    /// A boolean value indicating the result of the delete operation:
+    /// <list type="bullet">
+    ///   <item><description>true — if the student record was successfully deleted</description></item>
+    ///   <item><description>false — if no student record was found with the given id</description></item>
+    /// </list>
+    /// </returns>
     public async Task<bool> DeleteAsync(int id)
     {
         var student = await _unitOfWork.Students.GetByIdAsync(id);

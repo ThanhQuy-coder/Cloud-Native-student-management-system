@@ -15,6 +15,21 @@ public class ClassesController : ControllerBase
         _classService = classService;
     }
 
+    /// <summary>
+    /// Retrieves all class records from the system.
+    /// </summary>
+    /// <param name="none">This method does not take any parameters.</param>
+    /// <returns>
+    /// A <see cref="List{T}"/> of <see cref="ClassDto"/> objects, each containing:
+    /// <list type="bullet">
+    ///   <item><description>Id</description></item>
+    ///   <item><description>ClassCode</description></item>
+    ///   <item><description>ClassName</description></item>
+    ///   <item><description>Major</description></item>
+    ///   <item><description>AcademicYear</description></item>
+    ///   <item><description>AcademicAdvisor</description></item>
+    /// </list>
+    /// </returns>
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -23,6 +38,22 @@ public class ClassesController : ControllerBase
         return Ok(classes);
     }
 
+    /// <summary>
+    /// Retrieves a single class record by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique integer identifier of the class.</param>
+    /// <returns>
+    /// A <see cref="ClassDto"/> object containing:
+    /// <list type="bullet">
+    ///   <item><description>Id</description></item>
+    ///   <item><description>ClassCode</description></item>
+    ///   <item><description>ClassName</description></item>
+    ///   <item><description>Major</description></item>
+    ///   <item><description>AcademicYear</description></item>
+    ///   <item><description>AcademicAdvisor</description></item>
+    /// </list>
+    /// If no class is found with the given id, returns a NotFound result.
+    /// </returns>
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -34,6 +65,25 @@ public class ClassesController : ControllerBase
         return Ok(cls);
     }
 
+    /// <summary>
+    /// Creates a new class record in the system.
+    /// </summary>
+    /// <param name="dto">
+    /// The data transfer object (<see cref="CreateClassDto"/>) containing the details
+    /// required to create a new class record.
+    /// </param>
+    /// <returns>
+    /// A <see cref="ClassDto"/> object representing the newly created class, including:
+    /// <list type="bullet">
+    ///   <item><description>Id</description></item>
+    ///   <item><description>ClassCode</description></item>
+    ///   <item><description>ClassName</description></item>
+    ///   <item><description>Major</description></item>
+    ///   <item><description>AcademicYear</description></item>
+    ///   <item><description>AcademicAdvisor</description></item>
+    /// </list>
+    /// If creation fails, returns a BadRequest result with the error message.
+    /// </returns>
     [HttpPost]
     public async Task<IActionResult> Create(CreateClassDto dto)
     {
@@ -52,6 +102,23 @@ public class ClassesController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Updates an existing class record by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique integer identifier of the class to update.</param>
+    /// <param name="dto">
+    /// The data transfer object (<see cref="UpdateClassDto"/>) containing the updated
+    /// details for the class record.
+    /// </param>
+    /// <returns>
+    /// A boolean value indicating the result of the update operation:
+    /// <list type="bullet">
+    ///   <item><description>true — if the class record was successfully updated</description></item>
+    ///   <item><description>false — if no class record was found with the given id</description></item>
+    /// </list>
+    /// If the update is successful, returns a NoContent result.  
+    /// If the class is not found, returns a NotFound result.
+    /// </returns>
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateClassDto dto)
     {
@@ -63,6 +130,19 @@ public class ClassesController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Deletes an existing class record by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique integer identifier of the class to delete.</param>
+    /// <returns>
+    /// A boolean value indicating the result of the delete operation:
+    /// <list type="bullet">
+    ///   <item><description>true — if the class record was successfully deleted</description></item>
+    ///   <item><description>false — if no class record was found with the given id</description></item>
+    /// </list>
+    /// If the deletion is successful, returns a NoContent result.  
+    /// If the class is not found, returns a NotFound result.
+    /// </returns>
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {

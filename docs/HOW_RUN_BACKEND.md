@@ -151,7 +151,13 @@ Lệnh này sẽ tạo database và các bảng tương ứng trong MySQL.
 
 ## 8.1. user-secrets cho JWT
 
-Mở terminal ở thư mục StudentManagement.Domain chạy lệnh sau:
+Mở terminal ở thư mục StudentManagement.Domain
+
+```bash
+cd StudentManagement.Domain/
+```
+
+Chạy lệnh sau:
 
 ```bash
 # "your_super_secret_key_at_least_32_characters" đặt tùy ý nhưng phải đủ hoặc hơn 32 ký tự
@@ -167,6 +173,7 @@ Lệnh này giúp sinh mã JWT để xác thực ở backend
 Chạy API bằng lệnh:
 
 ```bash
+# Phải đang ở thư mục backend
 dotnet run --project StudentManagement.Api
 ```
 
@@ -186,7 +193,9 @@ http://localhost:5081
 
 ---
 
-## 10. Mở Scalar
+## 10. Mở Scalar (Nếu muốn test api qua giao diện)
+
+> Tài liệu API tổng hợp giúp dễ quan sát các api hiện có
 
 Sau khi chạy backend, mở trình duyệt và truy cập:
 
@@ -203,167 +212,3 @@ https://localhost:7081/Scalar/v1
 Scalar dùng để kiểm tra API trực tiếp trên trình duyệt.
 
 ---
-
-## 11. Các lệnh thường dùng
-
-## Restore package
-
-```bash
-dotnet restore
-```
-
-## Build solution
-
-```bash
-dotnet build
-```
-
-## Run API
-
-```bash
-dotnet run --project StudentManagement.Api
-```
-
-## Tạo migration
-
-```bash
-dotnet ef migrations add `MigrationName` --project StudentManagement.Infrastructure --startup-project StudentManagement.Api
-```
-
-Ví dụ:
-
-```bash
-dotnet ef migrations add AddStudentTable --project StudentManagement.Infrastructure --startup-project StudentManagement.Api
-```
-
-## Update database
-
-```bash
-dotnet ef database update --project StudentManagement.Infrastructure --startup-project StudentManagement.Api
-```
-
-## Xóa migration mới nhất
-
-```bash
-dotnet ef migrations remove --project StudentManagement.Infrastructure --startup-project StudentManagement.Api
-```
-
----
-
-## 12. Một số lỗi thường gặp
-
-## 12.1. Không nhận lệnh dotnet ef
-
-Lỗi:
-
-```text
-Could not execute because the specified command or file was not found.
-```
-
-Cách xử lý:
-
-```bash
-dotnet tool install --global dotnet-ef
-```
-
-Sau đó mở lại terminal.
-
----
-
-## 12.2. Sai connection string
-
-Lỗi thường gặp:
-
-```text
-Access denied for user
-Unable to connect to any of the specified MySQL hosts
-```
-
-Cách xử lý:
-
-- Kiểm tra MySQL đã chạy chưa
-- Kiểm tra user
-- Kiểm tra password
-- Kiểm tra port, thường là `3306`
-- Kiểm tra database name
-
----
-
-## 12.3. Không tìm thấy DbContext
-
-Lỗi thường gặp:
-
-```text
-Unable to create a DbContext
-```
-
-Cách xử lý:
-
-- Kiểm tra `AppDbContext` nằm trong Infrastructure
-- Kiểm tra Api đã reference Infrastructure chưa
-- Kiểm tra đã đăng ký DbContext trong `Program.cs` chưa
-
-Ví dụ:
-
-```csharp
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
-    );
-});
-```
-
----
-
-## 13. Quy trình chạy backend từ đầu
-
-Tóm tắt các bước:
-
-```bash
-cd backend
-dotnet restore
-dotnet build
-dotnet ef database update --project StudentManagement.Infrastructure --startup-project StudentManagement.Api
-dotnet run --project StudentManagement.Api
-```
-
-Sau đó mở:
-
-```text
-https://localhost:xxxx/swagger
-```
-
----
-
-## 14. Ghi chú cho thành viên nhóm
-
-Khi một thành viên mới clone source code về, chỉ cần làm theo thứ tự:
-
-1. Cài .NET SDK
-2. Cài MySQL
-3. Cấu hình connection string
-4. Chạy `dotnet restore`
-5. Chạy `dotnet build`
-6. Chạy `dotnet ef database update`
-7. Chạy `dotnet run --project StudentManagement.Api`
-8. Mở Swagger để kiểm tra API
-
----
-
-## 15. Kết luận
-
-File này dùng để hướng dẫn cách chạy backend của dự án Student Management.
-
-Backend được chạy thông qua project:
-
-```text
-StudentManagement.Api
-```
-
-Database được quản lý thông qua project:
-
-```text
-StudentManagement.Infrastructure
-```

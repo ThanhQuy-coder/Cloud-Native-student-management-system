@@ -4,6 +4,13 @@ using StudentManagement.Domain.Entities;
 
 namespace StudentManagement.Infrastructure.Configurations
 {
+    /// <summary>
+    /// Defines the entity configuration for the <see cref="Student"/> entity in the database.
+    /// This file maps the Student entity to the "students" table, sets primary keys, 
+    /// configures property constraints (length, required fields, default values), 
+    /// enforces unique indexes on StudentCode, Email, and UserId, 
+    /// and establishes relationships between students, classes, and users with proper foreign key behavior.
+    /// </summary>
     public class StudentConfiguration : IEntityTypeConfiguration<Student>
     {
         public void Configure(EntityTypeBuilder<Student> builder)

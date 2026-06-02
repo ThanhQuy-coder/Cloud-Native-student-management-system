@@ -4,6 +4,12 @@ using StudentManagement.Domain.Entities;
 
 namespace StudentManagement.Infrastructure.Configurations
 {
+    /// <summary>
+    /// Defines the entity configuration for the <see cref="Role"/> entity in the database.
+    /// This file maps the Role entity to the "roles" table, sets primary keys, 
+    /// configures property constraints (length and required fields), enforces a unique index on RoleName, 
+    /// and seeds initial role data (Admin, Teacher, Student).
+    /// </summary>
     public class RoleConfiguration : IEntityTypeConfiguration<Role>
     {
         public void Configure(EntityTypeBuilder<Role> builder)

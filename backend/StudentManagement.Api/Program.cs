@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 
+// Configure JWT authentication with validation rules
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -26,6 +27,7 @@ builder.Services
         };
     });
 
+// Add authorization, OpenAPI docs, infrastructure, application services, and controllers
 builder.Services.AddAuthorization();
 builder.Services.AddOpenApi();
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -34,7 +36,7 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// Check Connection DB
+// Check database connection on startup
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -55,7 +57,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
+// Configure middleware and request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

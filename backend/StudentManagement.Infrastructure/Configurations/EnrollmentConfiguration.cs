@@ -4,6 +4,13 @@ using StudentManagement.Domain.Entities;
 
 namespace StudentManagement.Infrastructure.Configurations
 {
+    /// <summary>
+    /// Defines the entity configuration for the <see cref="Enrollment"/> entity in the database.
+    /// This file maps the Enrollment entity to the "enrollments" table, sets primary keys, 
+    /// configures score properties with precision, creates computed columns for total score and grade status, 
+    /// enforces unique constraints on student-course combinations, and establishes relationships 
+    /// between enrollments, students, and courses with cascade delete behavior.
+    /// </summary>
     public class EnrollmentConfiguration : IEntityTypeConfiguration<Enrollment>
     {
         public void Configure(EntityTypeBuilder<Enrollment> builder)

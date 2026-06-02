@@ -17,6 +17,21 @@ public class JwtTokenService : IJwtTokenService
         _configuration = configuration;
     }
 
+    /// <summary>
+    /// Generates a JWT token for a given user with claims for authentication and authorization.
+    /// </summary>
+    /// <param name="user">
+    /// The <see cref="User"/> entity containing the user details required to generate the token.
+    /// </param>
+    /// <returns>
+    /// A <see cref="string"/> representing the generated JWT token, which includes claims:
+    /// <list type="bullet">
+    ///   <item><description>NameIdentifier — the unique user Id</description></item>
+    ///   <item><description>Name — the username</description></item>
+    ///   <item><description>Role — the role name assigned to the user</description></item>
+    /// </list>
+    /// The token is signed using HMAC-SHA256 and expires after 2 hours.
+    /// </returns>
     public string GenerateToken(User user)
     {
         var jwtKey = _configuration["Jwt:Key"]!;

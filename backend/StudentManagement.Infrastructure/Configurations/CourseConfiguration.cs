@@ -4,6 +4,12 @@ using StudentManagement.Domain.Entities;
 
 namespace StudentManagement.Infrastructure.Configurations
 {
+    /// <summary>
+    /// Defines the entity configuration for the <see cref="Course"/> entity in the database.
+    /// This file maps the Course entity to the "courses" table, sets primary keys, 
+    /// configures property constraints (length, required fields, default values), 
+    /// enforces unique indexes, and establishes the relationship between courses and teachers.
+    /// </summary>
     public class CourseConfiguration : IEntityTypeConfiguration<Course>
     {
         public void Configure(EntityTypeBuilder<Course> builder)
