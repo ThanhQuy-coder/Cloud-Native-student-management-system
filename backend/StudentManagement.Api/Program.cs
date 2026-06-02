@@ -7,6 +7,19 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 var jwtKey = builder.Configuration["Jwt:Key"]!;
+var allowOrigin = builder.Configuration.GetSection("Cors:AllowedOrigins")
+                         .Get<string[]>()!;
+
+// Configure CORS to frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactVite", policy =>
+    {
+        policy.WithOrigins(allowOrigin)
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // Configure JWT authentication with validation rules
 builder.Services
@@ -64,6 +77,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseCors("AllowReactVite");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
