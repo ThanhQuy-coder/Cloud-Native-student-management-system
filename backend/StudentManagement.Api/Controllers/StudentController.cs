@@ -1,10 +1,14 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using StudentManagement.Api.Controllers;
 using StudentManagement.Application.DTOs.Students;
 using StudentManagement.Application.Interfaces.Services;
 
+[Authorize]
 [ApiController]
 [Route("api/students")]
-public class StudentsController : ControllerBase
+public class StudentsController : BaseController
 {
     private readonly IStudentService _studentService;
 
@@ -31,6 +35,7 @@ public class StudentsController : ControllerBase
     ///   <item><description>LearningStatus</description></item>
     /// </list>
     /// </returns>
+    [Authorize(Roles = "Admin,Staff,Teacher")]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -58,9 +63,23 @@ public class StudentsController : ControllerBase
     /// </list>
     /// If no student is found with the given id, returns a NotFound result.
     /// </returns>
+    [Authorize(Roles = "Admin,Staff,Teacher,Student")]
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
+        if (User.IsInRole("Student"))
+        {
+            var currentUserId = GetCurrentUserId();
+
+            if (currentUserId is null)
+                return Unauthorized();
+
+            var currentStudentId = await _studentService.GetStudentIdByUserIdAsync(currentUserId.Value);
+
+            if (currentStudentId != id)
+                return Forbid();
+        }
+
         var student = await _studentService.GetByIdAsync(id);
 
         if (student is null)
@@ -90,6 +109,7 @@ public class StudentsController : ControllerBase
     ///   <item><description>LearningStatus</description></item>
     /// </list>
     /// </returns>
+    [Authorize(Roles = "Admin,Staff")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateStudentDto dto)
     {
@@ -118,6 +138,7 @@ public class StudentsController : ControllerBase
     /// If the update is successful, returns a NoContent result.  
     /// If the student is not found, returns a NotFound result.
     /// </returns>
+    [Authorize(Roles = "Admin,Staff")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateStudentDto dto)
     {
@@ -142,6 +163,7 @@ public class StudentsController : ControllerBase
     /// If the deletion is successful, returns a NoContent result.  
     /// If the student is not found, returns a NotFound result.
     /// </returns>
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {

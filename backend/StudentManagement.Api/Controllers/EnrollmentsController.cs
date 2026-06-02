@@ -1,17 +1,21 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudentManagement.Application.DTOs.Enrollments;
 using StudentManagement.Application.Interfaces.Services;
 
 namespace StudentManagement.Api.Controllers;
 
+[Authorize]
 [ApiController]
-public class EnrollmentsController : ControllerBase
+public class EnrollmentsController : BaseController
 {
     private readonly IEnrollmentService _enrollmentService;
+    private readonly IStudentService _studentService;
 
-    public EnrollmentsController(IEnrollmentService enrollmentService)
+    public EnrollmentsController(IEnrollmentService enrollmentService, IStudentService studentService)
     {
         _enrollmentService = enrollmentService;
+        _studentService = studentService;
     }
 
     /// <summary>
@@ -35,6 +39,7 @@ public class EnrollmentsController : ControllerBase
     /// </list>
     /// If creation fails, returns a BadRequest result with the error message.
     /// </returns>
+    [Authorize(Roles = "Admin,Staff")]
     [HttpPost("api/enrollments")]
     public async Task<IActionResult> Create(CreateEnrollmentDto dto)
     {
@@ -70,9 +75,23 @@ public class EnrollmentsController : ControllerBase
     /// </list>
     /// If no subjects are found for the given student id, returns a NotFound result.
     /// </returns>
+    [Authorize(Roles = "Admin,Staff,Teacher,Student")]
     [HttpGet("api/students/{id:int}/subjects")]
     public async Task<IActionResult> GetSubjectsByStudentId(int id)
     {
+        if (User.IsInRole("Student"))
+        {
+            var currentUserId = GetCurrentUserId();
+
+            if (currentUserId is null)
+                return Unauthorized();
+
+            var currentStudentId = await _studentService.GetStudentIdByUserIdAsync(currentUserId.Value);
+
+            if (currentStudentId != id)
+                return Forbid();
+        }
+
         try
         {
             var subjects = await _enrollmentService.GetSubjectsByStudentIdAsync(id);
@@ -98,6 +117,7 @@ public class EnrollmentsController : ControllerBase
     /// If the deletion is successful, returns a NoContent result.  
     /// If the enrollment is not found, returns a NotFound result.
     /// </returns>
+    [Authorize(Roles = "Admin,Staff")]
     [HttpDelete("api/enrollments/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {

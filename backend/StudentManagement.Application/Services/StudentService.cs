@@ -203,4 +203,18 @@ public class StudentService : IStudentService
 
         return true;
     }
+
+    /// <summary>
+    /// Get the StudentId based on the provided UserId
+    /// Retrieves the StudentId associated with a given UserId.
+    /// Returns null if no student record is found.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user</param>
+    /// <returns>The StudentId if found, otherwise null</returns>
+    public async Task<int?> GetStudentIdByUserIdAsync(int userId)
+    {
+        var student = await _unitOfWork.Students.GetByUserIdAsync(userId);
+
+        return student?.Id;
+    }
 }

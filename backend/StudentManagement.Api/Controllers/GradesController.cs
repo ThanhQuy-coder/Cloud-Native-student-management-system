@@ -1,17 +1,21 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudentManagement.Application.DTOs.Grades;
 using StudentManagement.Application.Interfaces.Services;
 
 namespace StudentManagement.Api.Controllers;
 
+[Authorize]
 [ApiController]
-public class GradesController : ControllerBase
+public class GradesController : BaseController
 {
     private readonly IGradeService _gradeService;
+    private readonly IStudentService _studentService;
 
-    public GradesController(IGradeService gradeService)
+    public GradesController(IGradeService gradeService, IStudentService studentService)
     {
         _gradeService = gradeService;
+        _studentService = studentService;
     }
 
     /// <summary>
@@ -39,6 +43,7 @@ public class GradesController : ControllerBase
     /// </list>
     /// If creation fails, returns a BadRequest result with the error message.
     /// </returns>
+    [Authorize(Roles = "Admin,Teacher")]
     [HttpPost("api/grades")]
     public async Task<IActionResult> Create(CreateGradeDto dto)
     {
@@ -71,6 +76,7 @@ public class GradesController : ControllerBase
     /// If the update is successful, returns a NoContent result.  
     /// If the grade is not found, returns a NotFound result.
     /// </returns>
+    [Authorize(Roles = "Admin,Teacher")]
     [HttpPut("api/grades/{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateGradeDto dto)
     {
@@ -104,9 +110,23 @@ public class GradesController : ControllerBase
     /// </list>
     /// If no grades are found for the given student id, returns a NotFound result.
     /// </returns>
+    [Authorize(Roles = "Admin,Staff,Teacher,Student")]
     [HttpGet("api/students/{id:int}/grades")]
     public async Task<IActionResult> GetGradesByStudentId(int id)
     {
+        if (User.IsInRole("Student"))
+        {
+            var currentUserId = GetCurrentUserId();
+
+            if (currentUserId is null)
+                return Unauthorized();
+
+            var currentStudentId = await _studentService.GetStudentIdByUserIdAsync(currentUserId.Value);
+
+            if (currentStudentId != id)
+                return Forbid();
+        }
+
         try
         {
             var grades = await _gradeService.GetGradesByStudentIdAsync(id);

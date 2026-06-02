@@ -5,6 +5,13 @@ INSERT INTO Roles (Id, RoleName) VALUES
 (3, 'Teacher'),
 (4, 'Student');
 
+-- Username : Password
+-- admin01 : Admin@123
+-- giaovu01 : Staff@123
+-- teacher01 : Teacher@123
+-- student01 : Student@123
+-- student02 : Student@123
+-- student03 : Student@123
 INSERT INTO Users
 (
 Id,
@@ -14,12 +21,12 @@ RoleId,
 IsActive
 )
 VALUES
-(1, 'admin01', 'hashed_password_admin', 1, 1),
-(2, 'giaovu01', 'hashed_password_staff', 2, 1),
-(3, 'teacher01', 'hashed_password_teacher', 3, 1),
-(4, 'student01', 'hashed_password_student', 4, 1),
-(5, 'student02', 'hashed_password_student', 4, 1),
-(6, 'student03', 'hashed_password_student', 4, 1);
+(1, 'admin01', 'AQAAAAEAACcQAAAAEB4G3gm/pSuvdSg17aGcV+SZQlELFXDy/l0YNZVbPniNDKl+A4kpkCWclJfZzl4AwQ==', 1, 1),
+(2, 'giaovu01', 'AQAAAAEAACcQAAAAEEFp9LC14xxCuf671YzryEO2dfM0giuqBXZ/JroJay4XZC66XrpmmtqypJ9SCAV0dQ==', 2, 1),
+(3, 'teacher01', 'AQAAAAEAACcQAAAAELCejl//tCaXHmYZRhoomWYw5FBsGLTIv46xN7qQFCnbVszCcOJkYvPkmlzdRmZrqQ==', 3, 1),
+(4, 'student01', 'AQAAAAEAACcQAAAAEJtdseyiJZ5BmK8q6ZCVblJ6tJwJgTPkUAukiWkidBRFrRPpdKp6+xTcs9CKdVRFsg==', 4, 1),
+(5, 'student02', 'AQAAAAEAACcQAAAAEBqapEREo5BBr3srYRPB/JpTnJEBH4ZxhtM1KkeLFopMTNMxKD02cxF+MmW2nl029w==', 4, 1),
+(6, 'student03', 'AQAAAAEAACcQAAAAEJH8njBDFcQwL560R2wyByOrf4cxUZCE25eFThU+18T588R9iTEtbk/9wHH6rClrMQ==', 4, 1);
 
 INSERT INTO Classes
 (

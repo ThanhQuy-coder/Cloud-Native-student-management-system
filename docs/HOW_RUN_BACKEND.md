@@ -1,6 +1,6 @@
 # Hướng dẫn chạy Backend - Student Management
 
-> Ngày cập nhật 31/05/2026
+> Ngày cập nhật 02/06/2026
 
 ## 1. Yêu cầu môi trường
 
@@ -86,6 +86,12 @@ dotnet user-secrets set "ConnectionStrings:DefaultConnection" "server=localhost;
 
 ## 6. Cài Entity Framework Core CLI
 
+Kiểm tra đã cài EF Core CLI chưa:
+
+```bash
+dotnet ef --version
+```
+
 Nếu chưa cài EF Core CLI, chạy:
 
 ```bash
@@ -106,32 +112,11 @@ dotnet tool update --global dotnet-ef
 
 ---
 
-## 7. Tạo migration (Bỏ qua bước này vì đây dành cho việc khởi tạo do người đảm nhận nhiệm vụ backend thực hiện)
+## 7. Cập nhật database
 
-Chạy lệnh trong thư mục `backend`:
+Lưu ý không sử dụng file `init.sql` để tạo DB vì có thể sẽ bị lệch về các thuộc tính.
 
-```bash
-dotnet ef migrations add InitialCreate \
-  --project StudentManagement.Infrastructure \
-  --startup-project StudentManagement.Api
-```
-
-Nếu dùng PowerShell trên Windows, có thể viết một dòng:
-
-```bash
-dotnet ef migrations add InitialCreate --project StudentManagement.Infrastructure --startup-project StudentManagement.Api
-```
-
-Ý nghĩa:
-
-- `--project`: project chứa DbContext và migration
-- `--startup-project`: project khởi chạy ứng dụng, thường là API
-
----
-
-## 8. Cập nhật database
-
-Sau khi tạo migration, chạy:
+Phần này sẽ tạo bảng Database mà không phải làm thủ công và cũng giúp đồng bộ thuộc tính giữa code và database vậy nên cần phải làm, chạy lệnh sau để sinh các bảng bên trong database nhờ vào chuỗi connection string đã kết nối trước đó:
 
 ```bash
 dotnet ef database update \
@@ -149,7 +134,17 @@ Lệnh này sẽ tạo database và các bảng tương ứng trong MySQL.
 
 ---
 
-## 8.1. user-secrets cho JWT
+## 7.1. Chạy seed để có dữ liệu mẫu
+
+Mở file `database\seed.sql` và chạy để có dữ liệu mẫu
+
+Có nhiều cách để chạy, đơn giản nhất là mở MySQL workbench truy cập vào đúng Database và chạy file, toàn bộ dữ liệu mẫu sẽ có trong DB sau khi chạy.
+
+---
+
+## 7.2. user-secrets cho JWT
+
+Phần này quan trọng bởi vì phải có nó thì mới có thể có token, có token thì mới truy cập được vào các API khác.
 
 Mở terminal ở thư mục StudentManagement.Domain
 
@@ -168,7 +163,7 @@ dotnet user-secrets set "Jwt:Audience" "StudentManagementClient"
 
 Lệnh này giúp sinh mã JWT để xác thực ở backend
 
-## 9. Chạy backend
+## 8. Chạy backend
 
 Chạy API bằng lệnh:
 
@@ -193,7 +188,7 @@ http://localhost:5081
 
 ---
 
-## 10. Mở Scalar (Nếu muốn test api qua giao diện)
+## 9. Mở Scalar (Nếu muốn test api qua giao diện)
 
 > Tài liệu API tổng hợp giúp dễ quan sát các api hiện có
 

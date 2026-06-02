@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudentManagement.Application.DTOs.Classes;
 using StudentManagement.Application.Interfaces.Services;
 
 namespace StudentManagement.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/classes")]
 public class ClassesController : ControllerBase
@@ -30,6 +32,7 @@ public class ClassesController : ControllerBase
     ///   <item><description>AcademicAdvisor</description></item>
     /// </list>
     /// </returns>
+    [Authorize(Roles = "Admin,Staff,Teacher,Student")]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -54,6 +57,7 @@ public class ClassesController : ControllerBase
     /// </list>
     /// If no class is found with the given id, returns a NotFound result.
     /// </returns>
+    [Authorize(Roles = "Admin,Staff,Teacher,Student")]
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -84,6 +88,7 @@ public class ClassesController : ControllerBase
     /// </list>
     /// If creation fails, returns a BadRequest result with the error message.
     /// </returns>
+    [Authorize(Roles = "Admin,Staff")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateClassDto dto)
     {
@@ -119,6 +124,7 @@ public class ClassesController : ControllerBase
     /// If the update is successful, returns a NoContent result.  
     /// If the class is not found, returns a NotFound result.
     /// </returns>
+    [Authorize(Roles = "Admin,Staff")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateClassDto dto)
     {
@@ -143,6 +149,7 @@ public class ClassesController : ControllerBase
     /// If the deletion is successful, returns a NoContent result.  
     /// If the class is not found, returns a NotFound result.
     /// </returns>
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {

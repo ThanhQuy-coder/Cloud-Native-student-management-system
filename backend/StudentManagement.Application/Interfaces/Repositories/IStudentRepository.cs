@@ -11,4 +11,5 @@ public interface IStudentRepository : IRepository<Student>
     Task<IReadOnlyList<Student>> SearchAsync(string keyword);
 
     Task<IReadOnlyList<Student>> GetByClassIdAsync(int classId);
+    Task<Student?> GetByUserIdAsync(int userId);
 }

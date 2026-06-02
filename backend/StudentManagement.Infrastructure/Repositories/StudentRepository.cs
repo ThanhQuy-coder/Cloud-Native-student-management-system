@@ -125,4 +125,16 @@ public class StudentRepository : IStudentRepository
             .AsNoTracking()
             .ToListAsync();
     }
+
+    /// <summary>
+    /// Retrieves a student entity by the associated UserId.
+    /// Returns null if no student record is found.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user</param>
+    public async Task<Student?> GetByUserIdAsync(int userId)
+    {
+        return await _context.Students
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.UserId == userId);
+    }
 }
