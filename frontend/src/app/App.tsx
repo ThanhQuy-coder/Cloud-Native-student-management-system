@@ -406,6 +406,7 @@ function StudentTable() {
     // Định dạng lại ngày sinh thành kiểu yyyy-MM-dd phù hợp với DateOnly của C#
     const formattedDob = dob ? dob : new Date().toISOString().split('T')[0];
 
+    // SỬA TẠI ĐÂY: Thêm thuộc tính `learningStatus` vào payload gửi đi
     const payload = {
       studentCode,
       fullName,
@@ -414,7 +415,8 @@ function StudentTable() {
       gender,
       phone: phone || null,
       classId: Number(classId), // Ép kiểu về INT chính xác để khớp với int? ClassId trong DTO .NET
-      userId: null
+      userId: null,
+      learningStatus: learningStatus // <-- BỔ SUNG DÒNG NÀY ĐỂ GỬI TRẠNG THÁI SANG BACKEND API
     };
 
     try {
@@ -477,7 +479,7 @@ function StudentTable() {
     setGender("Nam");
     setPhone("");
     setClassId(""); // Reset về trống hoàn toàn
-    setLearningStatus("Đang học");
+    setLearningStatus("Đang học"); // <-- Đã có sẵn và hoàn toàn chính xác!
   };
 
   const startEdit = (st: any) => {
@@ -510,7 +512,13 @@ function StudentTable() {
             onChange={e => setSearch(e.target.value)}
           />
         </div>
-        <button style={s.btn("primary")} onClick={() => { resetForm(); setOpenModal(true); }}>
+        <button
+          style={s.btn("primary")}
+          onClick={() => {
+            resetForm();        // <-- Thêm hàm này để xóa sạch form và đặt learningStatus về "Đang học" ban đầu
+            setOpenModal(true);
+          }}
+        >
           <Plus size={16} style={{ marginRight: 6 }} /> Thêm Sinh viên mới
         </button>
       </div>
@@ -632,7 +640,7 @@ function StudentTable() {
                   <option value="Đang học">Đang học</option>
                   <option value="Bảo lưu">Bảo lưu</option>
                   <option value="Tốt nghiệp">Tốt nghiệp</option>
-                  <option value="Buộc thôi học">Buộc thôi học</option>
+                  <option value="Thôi học">Thôi học</option>
                 </select>
               </div>
             </div>

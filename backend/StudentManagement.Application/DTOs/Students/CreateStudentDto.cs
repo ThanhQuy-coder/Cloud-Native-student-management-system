@@ -10,4 +10,5 @@ public class CreateStudentDto
     public string? Phone { get; set; }
     public int? ClassId { get; set; }
     public int? UserId { get; set; }
+    public string LearningStatus { get; set; } = "Đang học";
 }

@@ -124,7 +124,9 @@ public class StudentService : IStudentService
             Phone = dto.Phone,
             ClassId = dto.ClassId,
             UserId = dto.UserId,
-            LearningStatus = "Đang học"
+
+            // 🛠️ SỬA DÒNG NÀY: Lấy dữ liệu động từ Frontend gửi lên qua DTO
+            LearningStatus = dto.LearningStatus
         };
 
         await _unitOfWork.Students.AddAsync(student);
