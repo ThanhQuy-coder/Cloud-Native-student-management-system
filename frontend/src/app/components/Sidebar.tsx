@@ -3,9 +3,8 @@ import { Link, useNavigate, useLocation } from "react-router";
 import { LayoutDashboard, UserCog, UserCheck, Layers, BarChart2, ClipboardList, Building2, BookOpen } from "lucide-react";
 import { useAuth } from "../auth";
 import { C } from "../theme";
-import type { Role } from "../auth";
 
-const MENUS: Record<Role, { path: string; label: string; icon: React.ReactNode }[]> = {
+const MENUS: Record<string, { path: string; label: string; icon: React.ReactNode }[]> = {
     admin: [
         { path: "/admin/dashboard", label: "Tổng quan", icon: <LayoutDashboard size={18} /> },
         { path: "/admin/accounts", label: "Quản lý tài khoản", icon: <UserCog size={18} /> },
@@ -29,14 +28,39 @@ const MENUS: Record<Role, { path: string; label: string; icon: React.ReactNode }
     ],
 };
 
-const ROLE_LABELS: Record<Role, string> = { admin: "Quản trị viên", giaovu: "Giáo vụ", lecturer: "Giảng viên", student: "Sinh viên" };
+const ROLE_LABELS: Record<string, string> = {
+    admin: "Quản trị viên",
+    giaovu: "Giáo vụ",
+    lecturer: "Giảng viên",
+    student: "Sinh viên"
+};
 
 export default function Sidebar() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+
     if (!user) return null;
-    const menu = MENUS[user.role];
+
+    // 1. Chuẩn hóa chuỗi quyền từ Backend (user.role) về dạng chuẩn tiếng Anh viết thường
+    let currentRole = (user.role || "").toLowerCase();
+
+    if (currentRole === "staff" || currentRole === "giaovu" || currentRole === "giáo vụ") {
+        currentRole = "giaovu";
+    }
+    if (currentRole === "teacher" || currentRole === "lecturer" || currentRole === "giảng viên") {
+        currentRole = "lecturer";
+    }
+    if (currentRole === "student" || currentRole === "sinh viên") {
+        currentRole = "student";
+    }
+    if (currentRole === "admin") {
+        currentRole = "admin";
+    }
+
+    // 2. Lấy danh sách menu & nhãn hiển thị tương ứng (Nếu không khớp, fallback về mảng trống để ko sập ứng dụng)
+    const menu = MENUS[currentRole] || [];
+    const roleLabel = ROLE_LABELS[currentRole] || "Người dùng";
 
     return (
         <div style={{ width: 240, minWidth: 240, height: "100vh", background: C.navy, display: "flex", flexDirection: "column", position: "fixed", top: 0, left: 0, zIndex: 100 }}>
@@ -53,7 +77,7 @@ export default function Sidebar() {
 
             <div style={{ padding: "12px 20px 4px" }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-                    {ROLE_LABELS[user.role]}
+                    {roleLabel}
                 </div>
             </div>
 

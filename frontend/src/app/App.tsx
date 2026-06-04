@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import { GraduationCap, Eye, EyeOff, Users, Building2, BookOpen, Shield, LayoutDashboard, UserCog, UserCheck, Layers, BarChart2, ClipboardList, PenLine, LogOut, Search, Plus, Pencil, Trash2, ChevronRight } from "lucide-react";
 
@@ -19,63 +20,152 @@ function LoginPage() {
   const { login, user } = useAuth();
   const navigate = useNavigate();
   const [showPw, setShowPw] = useState(false);
-  const [role, setRole] = useState<Role>("admin");
+
+  // Trạng thái Form thực tế từ người dùng nhập vào
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  // Trạng thái xử lý UI (báo lỗi hoặc đang gửi yêu cầu)
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Nếu đã đăng nhập thành công, tự động chuyển hướng theo Role thật từ Backend
   if (user) {
-    const defaultRoutes: Record<Role, string> = { admin: "/admin/dashboard", giaovu: "/giaovu/students", lecturer: "/lecturer/classes", student: "/student/profile" };
-    return <Navigate to={defaultRoutes[user.role]} replace />;
+    // Ép kiểu sang any để TypeScript không báo lỗi đỏ chữ role/roleName
+    let currentRole = ((user as any).role || (user as any).roleName || "").toLowerCase();
+
+    // Chuẩn hóa tất cả các trường hợp chữ từ database về 4 nhóm quyền chuẩn
+    if (currentRole === "staff" || currentRole === "giaovu" || currentRole === "giáo vụ") {
+      currentRole = "giaovu";
+    }
+    if (currentRole === "teacher" || currentRole === "lecturer" || currentRole === "giảng viên") {
+      currentRole = "lecturer";
+    }
+    if (currentRole === "student" || currentRole === "sinh viên") {
+      currentRole = "student";
+    }
+    if (currentRole === "admin") {
+      currentRole = "admin";
+    }
+
+    // Khai báo đường dẫn tương ứng (Record nới lỏng string để không bị bắt lỗi Type)
+    const defaultRoutes: Record<string, string> = {
+      admin: "/admin/dashboard",
+      giaovu: "/giaovu/students",
+      lecturer: "/lecturer/classes",
+      student: "/student/profile"
+    };
+
+    // Nếu không khớp quyền nào thì đẩy về login, ngược lại điều hướng chuẩn đường dẫn
+    const targetRoute = defaultRoutes[currentRole] || "/login";
+    return <Navigate to={targetRoute} replace />;
   }
 
-  const nameMap: Record<Role, string> = { admin: "Nguyễn Quản Trị", giaovu: "Trần Thị Giáo Vụ", lecturer: "TS. Nguyễn Hữu Đức", student: "Nguyễn Văn An" };
+  // Hàm xử lý Đăng nhập Thực tế kết nối API
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault(); // Chặn hành vi reload lại trang
+    setErrorMessage("");
 
-  function handleLogin() {
-    const defaultRoutes: Record<Role, string> = { admin: "/admin/dashboard", giaovu: "/giaovu/students", lecturer: "/lecturer/classes", student: "/student/profile" };
-    login({ role, name: nameMap[role], username: username || role + "01" });
-    navigate(defaultRoutes[role]);
+    if (!username.trim() || !password.trim()) {
+      setErrorMessage("Vui lòng điền đầy đủ Tên đăng nhập và Mật khẩu.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // Gọi hàm login thực tế qua API đã cấu hình ở auth.tsx
+    const result = await login(username, password);
+
+    setIsSubmitting(false);
+
+    if (result.success) {
+      // Khi login thành công, Context Provider sẽ cập nhật state `user`
+      // Luồng xử lý component sẽ re-render và chạy vào khối điều hướng ở trên tự động.
+    } else {
+      setErrorMessage(result.message || "Đăng nhập thất bại.");
+    }
   }
 
   return (
     <div style={{ ...s.page, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ ...s.card, width: 400, padding: 40, textAlign: "center" }}>
+      {/* Bao bọc bằng thẻ form để kích hoạt tính năng nhấn Enter để đăng nhập */}
+      <form onSubmit={handleLogin} style={{ ...s.card, width: 400, padding: 40, textAlign: "center" }}>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
           <div style={{ background: C.navy, borderRadius: 16, padding: 14 }}>
             <GraduationCap size={32} color={C.white} />
           </div>
         </div>
         <h1 style={{ fontSize: 20, fontWeight: 700, color: C.textPrimary, margin: "0 0 4px" }}>Hệ thống Quản lý Sinh viên</h1>
-        <p style={{ fontSize: 13, color: C.textSecondary, margin: "0 0 28px" }}>Trường Đại học Công nghệ</p>
+        <p style={{ fontSize: 13, color: C.textSecondary, margin: "0 0 24px" }}>Trường Đại học Công nghệ</p>
+
+        {/* Hiển thị thông báo lỗi từ API nếu có */}
+        {errorMessage && (
+          <div style={{
+            background: "#FEF2F2",
+            color: C.danger,
+            border: "1px solid #FEE2E2",
+            borderRadius: 8,
+            padding: "10px 12px",
+            fontSize: 13,
+            marginBottom: 16,
+            textAlign: "left"
+          }}>
+            {errorMessage}
+          </div>
+        )}
 
         <div style={s.formGroup}>
           <label style={s.label}>Tên đăng nhập</label>
-          <input style={s.input} placeholder="Nhập tên đăng nhập" value={username} onChange={e => setUsername(e.target.value)} />
+          <input
+            style={s.input}
+            placeholder="Nhập tên đăng nhập"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            disabled={isSubmitting}
+          />
         </div>
 
         <div style={s.formGroup}>
           <label style={s.label}>Mật khẩu</label>
           <div style={{ position: "relative" }}>
-            <input type={showPw ? "text" : "password"} style={{ ...s.input, paddingRight: 40 }} placeholder="Nhập mật khẩu" value={password} onChange={e => setPassword(e.target.value)} />
-            <button onClick={() => setShowPw(!showPw)} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: C.textSecondary, padding: 0, display: "flex" }}>
+            <input
+              type={showPw ? "text" : "password"}
+              style={{ ...s.input, paddingRight: 40 }}
+              placeholder="Nhập mật khẩu"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              disabled={isSubmitting}
+            />
+            <button
+              type="button" // Tránh nhầm lẫn submit form
+              onClick={() => setShowPw(!showPw)}
+              style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: C.textSecondary, padding: 0, display: "flex" }}
+            >
               {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
         </div>
 
-        <div style={s.formGroup}>
-          <label style={s.label}>Vai trò</label>
-          <select style={{ ...s.select, width: "100%" }} value={role} onChange={e => setRole(e.target.value as Role)}>
-            <option value="admin">Admin</option>
-            <option value="giaovu">Giáo vụ</option>
-            <option value="lecturer">Giảng viên</option>
-            <option value="student">Sinh viên</option>
-          </select>
-        </div>
+        {/* BỎ thẻ <select> phân quyền cũ vì Role giờ đây sẽ do Backend kiểm tra và trả về dựa vào DB */}
 
-        <button onClick={handleLogin} style={{ ...s.btn("primary"), width: "100%", justifyContent: "center", padding: "12px 16px", fontSize: 14, borderRadius: 10, marginTop: 8 }}>
-          Đăng nhập
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          style={{
+            ...s.btn("primary"),
+            width: "100%",
+            justifyContent: "center",
+            padding: "12px 16px",
+            fontSize: 14,
+            borderRadius: 10,
+            marginTop: 16,
+            opacity: isSubmitting ? 0.7 : 1,
+            cursor: isSubmitting ? "not-allowed" : "pointer"
+          }}
+        >
+          {isSubmitting ? "Đang xác thực..." : "Đăng nhập"}
         </button>
-      </div>
+      </form>
     </div>
   );
 }
@@ -227,126 +317,333 @@ function AccountManagement() {
 const emptySv = { mssv: "", name: "", class: "CNTT01", dob: "", email: "", phone: "", faculty: "CNTT", status: "Đang học" };
 
 function StudentTable() {
-  const [list, setList] = useState(students);
-  const [search, setSearch] = useState("");
-  const [filterClass, setFilterClass] = useState("all");
-  const [modal, setModal] = useState<null | "add" | number>(null);
-  const [form, setForm] = useState(emptySv);
+  const { user } = useAuth();
+  const [studentList, setStudentList] = useState<any[]>([]);
+  const [classList, setClassList] = useState<any[]>([]); // State lưu danh sách lớp học thực tế từ DB
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const uniqueClasses = Array.from(new Set(list.map(sv => sv.class)));
-  const filtered = list.filter(sv =>
-    (filterClass === "all" || sv.class === filterClass) &&
-    (sv.name.toLowerCase().includes(search.toLowerCase()) || sv.mssv.includes(search))
+  const [search, setSearch] = useState("");
+  const [openModal, setOpenModal] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<any | null>(null);
+
+  // Form State phục vụ Thêm/Sửa Sinh viên
+  const [studentCode, setStudentCode] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [dob, setDob] = useState("");
+  const [gender, setGender] = useState("Nam");
+  const [phone, setPhone] = useState("");
+
+  // SỬA: classId lưu dạng chuỗi để làm việc với thẻ select, mặc định ban đầu để trống ""
+  const [classId, setClassId] = useState<string>("");
+  const [learningStatus, setLearningStatus] = useState("Đang học");
+
+  // 1. API lấy danh sách sinh viên
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await fetch("http://localhost:5111/api/students", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user?.token}`
+        }
+      });
+
+      if (!response.ok) throw new Error("Không thể tải danh sách sinh viên.");
+      const data = await response.json();
+      setStudentList(data);
+    } catch (err: any) {
+      setError(err.message || "Đã xảy ra lỗi kết nối dữ liệu.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 2. API lấy danh sách lớp học để đổ vào thẻ Chọn (Select)
+  const fetchClasses = async () => {
+    try {
+      // Lưu ý: Đổi lại URL này nếu endpoint lấy danh sách lớp của bạn khác /api/classes nhé!
+      const response = await fetch("http://localhost:5111/api/classes", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user?.token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setClassList(data);
+      }
+    } catch (err) {
+      console.error("Không thể tải danh sách lớp học:", err);
+    }
+  };
+
+  // Tự động load dữ liệu sinh viên và lớp học khi mở màn hình
+  useEffect(() => {
+    if (user?.token) {
+      fetchStudents();
+      fetchClasses();
+    }
+  }, [user]);
+
+  // Hàm xử lý Thêm mới hoặc Cập nhật sinh viên qua API
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!studentCode || !fullName || !email) {
+      alert("Vui lòng nhập đầy đủ các trường bắt buộc!");
+      return;
+    }
+
+    if (!classId) {
+      alert("Vui lòng chọn một lớp học!");
+      return;
+    }
+
+    // Định dạng lại ngày sinh thành kiểu yyyy-MM-dd phù hợp với DateOnly của C#
+    const formattedDob = dob ? dob : new Date().toISOString().split('T')[0];
+
+    const payload = {
+      studentCode,
+      fullName,
+      email,
+      dob: formattedDob, // Khớp với định dạng DateOnly ở Backend
+      gender,
+      phone: phone || null,
+      classId: Number(classId), // Ép kiểu về INT chính xác để khớp với int? ClassId trong DTO .NET
+      userId: null
+    };
+
+    try {
+      let response;
+      if (editingStudent) {
+        response = await fetch(`http://localhost:5111/api/students/${editingStudent.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user?.token}`
+          },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        response = await fetch("http://localhost:5111/api/students", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user?.token}`
+          },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      if (response.ok) {
+        setOpenModal(false);
+        fetchStudents(); // Tải lại bảng dữ liệu thật
+        resetForm();
+      } else {
+        const errorText = await response.text();
+        console.error("Lỗi từ Server:", errorText);
+        alert("Lưu thất bại! Bạn hãy kiểm tra lại xem Mã sinh viên hoặc Email có bị trùng trong DB không.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi kết nối API.");
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa sinh viên này không?")) return;
+    try {
+      const response = await fetch(`http://localhost:5111/api/students/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${user?.token}` }
+      });
+      if (response.ok) fetchStudents();
+      else alert("Xóa thất bại!");
+    } catch (err) {
+      alert("Lỗi kết nối API khi xóa.");
+    }
+  };
+
+  const resetForm = () => {
+    setEditingStudent(null);
+    setStudentCode("");
+    setFullName("");
+    setEmail("");
+    setDob("");
+    setGender("Nam");
+    setPhone("");
+    setClassId(""); // Reset về trống hoàn toàn
+    setLearningStatus("Đang học");
+  };
+
+  const startEdit = (st: any) => {
+    setEditingStudent(st);
+    setStudentCode(st.studentCode || "");
+    setFullName(st.fullName || "");
+    setEmail(st.email || "");
+    setDob(st.dob ? st.dob.substring(0, 10) : "");
+    setGender(st.gender || "Nam");
+    setPhone(st.phone || "");
+    setClassId(st.classId ? String(st.classId) : ""); // Map ID lớp lên form chọn
+    setLearningStatus(st.learningStatus || "Đang học");
+    setOpenModal(true);
+  };
+
+  const filtered = studentList.filter(sItem =>
+    (sItem.fullName || "").toLowerCase().includes(search.toLowerCase()) ||
+    (sItem.studentCode || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  function openAdd() { setForm(emptySv); setModal("add"); }
-  function openEdit(sv: typeof students[0]) {
-    setForm({ mssv: sv.mssv, name: sv.name, class: sv.class, dob: sv.dob, email: sv.email, phone: sv.phone, faculty: sv.faculty, status: sv.status });
-    setModal(sv.id);
-  }
-  function closeModal() { setModal(null); }
-
-  function handleSave() {
-    if (!form.mssv.trim() || !form.name.trim()) return;
-    if (modal === "add") {
-      setList(l => [...l, { id: Date.now(), gpa: 0, semester: "HK2 2024", ...form }]);
-    } else {
-      setList(l => l.map(sv => sv.id === modal ? { ...sv, ...form } : sv));
-    }
-    closeModal();
-  }
-
-  const f = (field: keyof typeof emptySv) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-    setForm(prev => ({ ...prev, [field]: e.target.value }));
-
   return (
-    <div style={s.card}>
-      <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-        <div style={{ position: "relative", flex: 1, minWidth: 200 }}>
-          <Search size={15} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: C.textSecondary }} />
-          <input style={{ ...s.input, paddingLeft: 32 }} placeholder="Tìm kiếm sinh viên..." value={search} onChange={e => setSearch(e.target.value)} />
+    <>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
+        <div style={{ position: "relative", width: 300 }}>
+          <Search size={18} color={C.textSecondary} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
+          <input
+            style={{ ...s.input, paddingLeft: 38 }}
+            placeholder="Tìm kiếm mã, tên sinh viên..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
         </div>
-        <select style={s.select} value={filterClass} onChange={e => setFilterClass(e.target.value)}>
-          <option value="all">Tất cả lớp</option>
-          {uniqueClasses.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <button style={s.btn("primary")} onClick={openAdd}><Plus size={15} /> Thêm sinh viên</button>
+        <button style={s.btn("primary")} onClick={() => { resetForm(); setOpenModal(true); }}>
+          <Plus size={16} style={{ marginRight: 6 }} /> Thêm Sinh viên mới
+        </button>
       </div>
-      <table style={s.table}>
-        <thead>
-          <tr><th style={s.th}>STT</th><th style={s.th}>MSSV</th><th style={s.th}>Họ tên</th><th style={s.th}>Lớp</th><th style={s.th}>Ngày sinh</th><th style={s.th}>Email</th><th style={s.th}>Thao tác</th></tr>
-        </thead>
-        <tbody>
-          {filtered.map((sv, i) => (
-            <tr key={sv.id}>
-              <td style={s.td}>{i + 1}</td>
-              <td style={{ ...s.td, fontWeight: 600, color: C.navy }}>{sv.mssv}</td>
-              <td style={s.td}>{sv.name}</td>
-              <td style={s.td}><Badge label={sv.class} color={C.navy} /></td>
-              <td style={s.td}>{sv.dob}</td>
-              <td style={{ ...s.td, color: C.textSecondary }}>{sv.email}</td>
-              <td style={s.td}>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button onClick={() => openEdit(sv)} style={{ ...s.btn("ghost"), color: C.info }}><Pencil size={15} /></button>
-                  <button onClick={() => setList(l => l.filter(x => x.id !== sv.id))} style={{ ...s.btn("ghost"), color: C.danger }}><Trash2 size={15} /></button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
 
-      {modal !== null && (
-        <Modal title={modal === "add" ? "Thêm sinh viên" : "Chỉnh sửa sinh viên"} onClose={closeModal}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div style={s.formGroup}>
-              <label style={s.label}>MSSV <span style={{ color: C.danger }}>*</span></label>
-              <input style={s.input} placeholder="SV2024001" value={form.mssv} onChange={f("mssv")} />
+      {loading ? (
+        <div style={{ textAlign: "center", padding: 40, color: C.textSecondary }}>Đang tải dữ liệu từ máy chủ API .NET...</div>
+      ) : error ? (
+        <div style={{ color: C.danger, padding: 20, background: "#FEF2F2", borderRadius: 8 }}>{error}</div>
+      ) : (
+        <div style={s.tableContainer}>
+          <table style={s.table}>
+            <thead>
+              <tr style={s.thRow}>
+                <th style={s.th}>Mã SV</th>
+                <th style={s.th}>Họ và Tên</th>
+                <th style={s.th}>Lớp</th>
+                <th style={s.th}>Ngày sinh</th>
+                <th style={s.th}>Giới tính</th>
+                <th style={s.th}>Trạng thái</th>
+                <th style={{ ...s.th, textAlign: "right" }}>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((st) => (
+                <tr key={st.id} style={s.tr}>
+                  <td style={{ ...s.td, fontWeight: 600 }}>{st.studentCode}</td>
+                  <td style={s.td}>
+                    <div>{st.fullName}</div>
+                    <div style={{ fontSize: 11, color: C.textSecondary }}>{st.email}</div>
+                  </td>
+                  <td style={s.td}>{st.className || `ID Lớp: ${st.classId}`}</td>
+                  <td style={s.td}>{st.dob ? new Date(st.dob).toLocaleDateString("vi-VN") : "---"}</td>
+                  <td style={s.td}>{st.gender}</td>
+                  <td style={s.td}>{statusBadge(st.learningStatus || "Đang học")}</td>
+                  <td style={{ ...s.td, textAlign: "right" }}>
+                    <button style={{ ...s.btnIcon, color: C.warning }} onClick={() => startEdit(st)}>
+                      <Pencil size={16} />
+                    </button>
+                    <button style={{ ...s.btnIcon, color: C.danger, marginLeft: 8 }} onClick={() => handleDelete(st.id)}>
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={7} style={{ ...s.td, textAlign: "center", color: C.textSecondary, padding: 30 }}>
+                    Không tìm thấy dữ liệu sinh viên nào.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {openModal && (
+        <Modal title={editingStudent ? "Cập nhật Sinh viên" : "Thêm Sinh viên mới"} onClose={() => setOpenModal(false)}>
+          <form onSubmit={handleSave}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+              <div style={s.formGroup}>
+                <label style={s.label}>Mã số Sinh viên *</label>
+                <input style={s.input} value={studentCode} onChange={e => setStudentCode(e.target.value)} placeholder="VD: SV1001" required />
+              </div>
+              <div style={s.formGroup}>
+                <label style={s.label}>Họ và Tên *</label>
+                <input style={s.input} value={fullName} onChange={e => setFullName(e.target.value)} placeholder="VD: Nguyễn Văn A" required />
+              </div>
+              <div style={s.formGroup}>
+                <label style={s.label}>Địa chỉ Email *</label>
+                <input type="email" style={s.input} value={email} onChange={e => setEmail(e.target.value)} placeholder="VD: sv@utc.edu.vn" required />
+              </div>
+              <div style={s.formGroup}>
+                <label style={s.label}>Số điện thoại</label>
+                <input style={s.input} value={phone} onChange={e => setPhone(e.target.value)} placeholder="VD: 0987654321" />
+              </div>
+              <div style={s.formGroup}>
+                <label style={s.label}>Ngày sinh</label>
+                <input type="date" style={s.input} value={dob} onChange={e => setDob(e.target.value)} />
+              </div>
+              <div style={s.formGroup}>
+                <label style={s.label}>Giới tính</label>
+                <select style={s.input} value={gender} onChange={e => setGender(e.target.value)}>
+                  <option value="Nam">Nam</option>
+                  <option value="Nữ">Nữ</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </div>
+
+              {/* THAY THẾ: Ô nhập text sang danh sách chọn (Select) lấy dữ liệu thật từ DB */}
+              <div style={s.formGroup}>
+                <label style={s.label}>Lớp Học *</label>
+                <select
+                  style={s.input}
+                  value={classId}
+                  onChange={e => setClassId(e.target.value)}
+                  required
+                >
+                  <option value="">-- Chọn lớp học --</option>
+                  {classList.map((c) => (
+                    // value lưu bằng ID số, nhưng hiển thị cho người dùng bằng Tên chữ (className)
+                    <option key={c.id} value={c.id}>
+                      {c.className || c.classCode || `Lớp ID: ${c.id}`}
+                    </option>
+                  ))}
+                  {/* Trường hợp database của bạn chưa có dữ liệu lớp học, cho hiện tạm 1 option mẫu */}
+                  {classList.length === 0 && (
+                    <>
+                      <option value="1">Công nghệ thông tin 01</option>
+                      <option value="2">Công nghệ thông tin 02</option>
+                    </>
+                  )}
+                </select>
+              </div>
+
+              <div style={s.formGroup}>
+                <label style={s.label}>Tình trạng học tập</label>
+                <select style={s.input} value={learningStatus} onChange={e => setLearningStatus(e.target.value)}>
+                  <option value="Đang học">Đang học</option>
+                  <option value="Bảo lưu">Bảo lưu</option>
+                  <option value="Tốt nghiệp">Tốt nghiệp</option>
+                  <option value="Buộc thôi học">Buộc thôi học</option>
+                </select>
+              </div>
             </div>
-            <div style={s.formGroup}>
-              <label style={s.label}>Họ và tên <span style={{ color: C.danger }}>*</span></label>
-              <input style={s.input} placeholder="Nguyễn Văn A" value={form.name} onChange={f("name")} />
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
+              <button type="button" style={s.btn("secondary")} onClick={() => setOpenModal(false)}>Hủy bỏ</button>
+              <button type="submit" style={s.btn("primary")}>Lưu thông tin</button>
             </div>
-            <div style={s.formGroup}>
-              <label style={s.label}>Lớp</label>
-              <input style={s.input} placeholder="CNTT01" value={form.class} onChange={f("class")} />
-            </div>
-            <div style={s.formGroup}>
-              <label style={s.label}>Khoa</label>
-              <select style={{ ...s.select, width: "100%" }} value={form.faculty} onChange={f("faculty")}>
-                {["CNTT", "KTPM", "HTTT", "ATTT"].map(fc => <option key={fc}>{fc}</option>)}
-              </select>
-            </div>
-            <div style={s.formGroup}>
-              <label style={s.label}>Ngày sinh</label>
-              <input type="date" style={s.input} value={form.dob} onChange={f("dob")} />
-            </div>
-            <div style={s.formGroup}>
-              <label style={s.label}>Trạng thái</label>
-              <select style={{ ...s.select, width: "100%" }} value={form.status} onChange={f("status")}>
-                <option>Đang học</option>
-                <option>Bảo lưu</option>
-                <option>Tốt nghiệp</option>
-              </select>
-            </div>
-            <div style={{ ...s.formGroup, gridColumn: "span 2" }}>
-              <label style={s.label}>Email</label>
-              <input style={s.input} placeholder="sv@edu.vn" value={form.email} onChange={f("email")} />
-            </div>
-            <div style={{ ...s.formGroup, gridColumn: "span 2" }}>
-              <label style={s.label}>Số điện thoại</label>
-              <input style={s.input} placeholder="09xxxxxxxx" value={form.phone} onChange={f("phone")} />
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 4 }}>
-            <button style={s.btn("outline")} onClick={closeModal}>Hủy</button>
-            <button style={s.btn("primary")} onClick={handleSave}>
-              {modal === "add" ? "Thêm sinh viên" : "Lưu thay đổi"}
-            </button>
-          </div>
+          </form>
         </Modal>
       )}
-    </div>
+    </>
   );
 }
 
@@ -962,6 +1259,7 @@ function GiaovuClasses() {
   );
 }
 
+
 // ─── APP ──────────────────────────────────────────────────────────────────────
 export default function App() {
   return (
@@ -992,11 +1290,10 @@ export default function App() {
             <Route path="/student/profile" element={<Guard roles={["student"]}><StudentProfile /></Guard>} />
             <Route path="/student/courses" element={<Guard roles={["student"]}><RegisteredCourses /></Guard>} />
             <Route path="/student/grades" element={<Guard roles={["student"]}><StudentGrades /></Guard>} />
-
-            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </div>
       </BrowserRouter>
     </AuthProvider>
   );
 }
+

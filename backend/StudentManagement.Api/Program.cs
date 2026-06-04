@@ -7,8 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 var jwtKey = builder.Configuration["Jwt:Key"]!;
-var allowOrigin = builder.Configuration.GetSection("Cors:AllowedOrigins")
-                         .Get<string[]>()!;
+var allowOrigin = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()!;
 
 // Configure CORS to frontend
 builder.Services.AddCors(options =>
@@ -17,7 +16,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(allowOrigin)
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials(); // Hỗ trợ nếu sau này bạn dùng Cookie/Credentials
     });
 });
 
@@ -35,12 +35,11 @@ builder.Services
 
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
     });
 
-// Add authorization, OpenAPI docs, infrastructure, application services, and controllers
+// Add services
 builder.Services.AddAuthorization();
 builder.Services.AddOpenApi();
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -57,16 +56,16 @@ using (var scope = app.Services.CreateScope())
     {
         if (dbContext.Database.CanConnect())
         {
-            Console.WriteLine("Connection DB Success");
+            Console.WriteLine("--> Connection DB Success");
         }
         else
         {
-            Console.WriteLine("Connection DB Failed");
+            Console.WriteLine("--> Connection DB Failed");
         }
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Connection DB Error: {ex.Message}");
+        Console.WriteLine($"--> Connection DB Error: {ex.Message}");
     }
 }
 
@@ -77,10 +76,15 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+// THỨ TỰ MIDDLEWARE QUAN TRỌNG:
 app.UseCors("AllowReactVite");
+
+// Nếu chạy local bị lỗi ép chuyển hướng HTTPS thì comment dòng dưới lại
+// app.UseHttpsRedirection(); 
+
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
-app.UseHttpsRedirection();
-app.Run();
 
+app.MapControllers();
+
+app.Run();
