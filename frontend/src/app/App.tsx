@@ -669,13 +669,83 @@ const emptyClass = { code: "", name: "", faculty: "CNTT", size: 0, lecturer: "" 
 const emptySubject = { code: "", name: "", credits: 3, faculty: "CNTT" };
 
 function ClassSubjectTabs() {
+  const { user } = useAuth();
   const [tab, setTab] = useState<"classes" | "subjects">("classes");
-  const [classList, setClassList] = useState(classes);
-  const [subjectList, setSubjectList] = useState(subjects);
+  const [classList, setClassList] = useState<any[]>([]);
+  const [subjectList, setSubjectList] = useState<any[]>([]);
+
+  // --- State phục vụ tính năng tìm kiếm ---
+  const [classSearchQuery, setClassSearchQuery] = useState("");
+  const [subjectSearchQuery, setSubjectSearchQuery] = useState("");
+
   const [classModal, setClassModal] = useState<null | "add" | number>(null);
   const [subjectModal, setSubjectModal] = useState<null | "add" | number>(null);
   const [classForm, setClassForm] = useState(emptyClass);
   const [subjectForm, setSubjectForm] = useState(emptySubject);
+
+  const token = user?.token || "";
+  const API_BASE_URL = "http://localhost:5111";
+
+  const fetchClasses = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/classes`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const mapped = data.map((c: any) => ({
+          id: c.id,
+          code: c.classCode,
+          name: c.className,
+          faculty: c.major || "CNTT",
+          size: 45,
+          lecturer: c.academicAdvisor || ""
+        }));
+        setClassList(mapped);
+      }
+    } catch (err) {
+      console.error("Lỗi fetch classes:", err);
+    }
+  };
+
+  const fetchSubjects = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/subjects`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const mapped = data.map((s: any) => ({
+          id: s.id,
+          code: s.subjectCode,
+          name: s.subjectName,
+          credits: s.credits,
+          faculty: "CNTT"
+        }));
+        setSubjectList(mapped);
+      }
+    } catch (err) {
+      console.error("Lỗi fetch subjects:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchClasses();
+    fetchSubjects();
+  }, [token]);
+
+  // --- Logic lọc dữ liệu theo từ khóa tìm kiếm (Không phân biệt hoa thường) ---
+  const filteredClasses = classList.filter(c =>
+    c.code.toLowerCase().includes(classSearchQuery.toLowerCase()) ||
+    c.name.toLowerCase().includes(classSearchQuery.toLowerCase())
+  );
+
+  const filteredSubjects = subjectList.filter(sub =>
+    sub.code.toLowerCase().includes(subjectSearchQuery.toLowerCase()) ||
+    sub.name.toLowerCase().includes(subjectSearchQuery.toLowerCase())
+  );
 
   const tabStyle = (active: boolean): React.CSSProperties => ({
     padding: "8px 20px", border: "none", cursor: "pointer", fontWeight: active ? 600 : 400,
@@ -683,25 +753,104 @@ function ClassSubjectTabs() {
     color: active ? C.navy : C.textSecondary, background: "transparent", fontSize: 14,
   });
 
-  function saveClass() {
+  // CSS Style dùng chung cho thanh Search Container để giống trang Quản lý sinh viên
+  const searchContainerStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    position: "relative",
+    flex: 1,
+    maxWidth: "350px"
+  };
+
+  const searchInputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "8px 12px 8px 36px",
+    borderRadius: "6px",
+    border: `1px solid ${C.border}`,
+    fontSize: "14px",
+    outline: "none"
+  };
+
+  const searchIconStyle: React.CSSProperties = {
+    position: "absolute",
+    left: "12px",
+    color: C.textSecondary
+  };
+
+  async function saveClass() {
     if (!classForm.code.trim() || !classForm.name.trim()) return;
-    if (classModal === "add") {
-      setClassList(l => [...l, { id: Date.now(), ...classForm }]);
-    } else {
-      setClassList(l => l.map(c => c.id === classModal ? { ...c, ...classForm } : c));
-    }
-    setClassModal(null);
+    const isAdd = classModal === "add";
+    const url = isAdd ? `${API_BASE_URL}/api/classes` : `${API_BASE_URL}/api/classes/${classModal}`;
+    const method = isAdd ? "POST" : "PUT";
+
+    const bodyData = {
+      classCode: classForm.code.trim(),
+      className: classForm.name.trim(),
+      major: classForm.faculty || "CNTT",
+      academicYear: "2024-2028",
+      academicAdvisor: classForm.lecturer ? classForm.lecturer.trim() : null
+    };
+
+    try {
+      const res = await fetch(url, {
+        method: method,
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(bodyData)
+      });
+      if (res.ok) { setClassModal(null); fetchClasses(); }
+      else { const txt = await res.text(); alert(`Thất bại: ${txt}`); }
+    } catch (err) { alert("Không thể kết nối đến máy chủ."); }
   }
 
-  function saveSubject() {
+  async function saveSubject() {
     if (!subjectForm.code.trim() || !subjectForm.name.trim()) return;
-    if (subjectModal === "add") {
-      setSubjectList(l => [...l, { id: Date.now(), ...subjectForm }]);
-    } else {
-      setSubjectList(l => l.map(s => s.id === subjectModal ? { ...s, ...subjectForm } : s));
-    }
-    setSubjectModal(null);
+    const isAdd = subjectModal === "add";
+    const url = isAdd ? `${API_BASE_URL}/api/subjects` : `${API_BASE_URL}/api/subjects/${subjectModal}`;
+    const method = isAdd ? "POST" : "PUT";
+
+    const bodyData = {
+      subjectCode: subjectForm.code.trim(),
+      subjectName: subjectForm.name.trim(),
+      credits: Number(subjectForm.credits) || 3,
+      description: `Môn học thuộc khoa ${subjectForm.faculty || "CNTT"}`,
+      teacherId: null,
+      status: "Mở"
+    };
+
+    try {
+      const res = await fetch(url, {
+        method: method,
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(bodyData)
+      });
+      if (res.ok) { setSubjectModal(null); fetchSubjects(); }
+      else { const txt = await res.text(); alert(`Thất bại: ${txt}`); }
+    } catch (err) { alert("Không thể kết nối đến máy chủ."); }
   }
+
+  const handleScaleDeleteClass = async (id: number) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa lớp học này không?")) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/classes/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) setClassList(l => l.filter(x => x.id !== id));
+      else alert(`Xóa thất bại (${res.status})`);
+    } catch (err) { console.error(err); }
+  };
+
+  const handleScaleDeleteSubject = async (id: number) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa môn học này không?")) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/subjects/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) setSubjectList(l => l.filter(x => x.id !== id));
+      else alert(`Xóa thất bại (${res.status})`);
+    } catch (err) { console.error(err); }
+  };
 
   const faculties = ["CNTT", "KTPM", "HTTT", "ATTT"];
 
@@ -714,13 +863,24 @@ function ClassSubjectTabs() {
 
       {tab === "classes" && (
         <>
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+          {/* Thanh Search điều chỉnh nằm bên cạnh nút Thêm Lớp */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, gap: 16 }}>
+            <div style={searchContainerStyle}>
+              <Search size={16} style={searchIconStyle} />
+              <input
+                style={searchInputStyle}
+                placeholder="Tìm kiếm mã lớp, tên lớp..."
+                value={classSearchQuery}
+                onChange={e => setClassSearchQuery(e.target.value)}
+              />
+            </div>
             <button style={s.btn("primary")} onClick={() => { setClassForm(emptyClass); setClassModal("add"); }}><Plus size={15} /> Thêm lớp</button>
           </div>
+
           <table style={s.table}>
             <thead><tr><th style={s.th}>Mã lớp</th><th style={s.th}>Tên lớp</th><th style={s.th}>Khoa</th><th style={s.th}>Sĩ số</th><th style={s.th}>Thao tác</th></tr></thead>
             <tbody>
-              {classList.map(c => (
+              {filteredClasses.map(c => (
                 <tr key={c.id}>
                   <td style={{ ...s.td, fontWeight: 600, color: C.navy }}>{c.code}</td>
                   <td style={s.td}>{c.name}</td>
@@ -729,11 +889,14 @@ function ClassSubjectTabs() {
                   <td style={s.td}>
                     <div style={{ display: "flex", gap: 6 }}>
                       <button onClick={() => { setClassForm({ code: c.code, name: c.name, faculty: c.faculty, size: c.size, lecturer: c.lecturer }); setClassModal(c.id); }} style={{ ...s.btn("ghost"), color: C.info }}><Pencil size={15} /></button>
-                      <button onClick={() => setClassList(l => l.filter(x => x.id !== c.id))} style={{ ...s.btn("ghost"), color: C.danger }}><Trash2 size={15} /></button>
+                      <button onClick={() => handleScaleDeleteClass(c.id)} style={{ ...s.btn("ghost"), color: C.danger }}><Trash2 size={15} /></button>
                     </div>
                   </td>
                 </tr>
               ))}
+              {filteredClasses.length === 0 && (
+                <tr><td colSpan={5} style={{ ...s.td, textAlign: "center", color: C.textSecondary }}>Không tìm thấy lớp học phù hợp.</td></tr>
+              )}
             </tbody>
           </table>
         </>
@@ -741,13 +904,24 @@ function ClassSubjectTabs() {
 
       {tab === "subjects" && (
         <>
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+          {/* Thanh Search điều chỉnh nằm bên cạnh nút Thêm Môn */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, gap: 16 }}>
+            <div style={searchContainerStyle}>
+              <Search size={16} style={searchIconStyle} />
+              <input
+                style={searchInputStyle}
+                placeholder="Tìm kiếm mã môn, tên môn..."
+                value={subjectSearchQuery}
+                onChange={e => setSubjectSearchQuery(e.target.value)}
+              />
+            </div>
             <button style={s.btn("primary")} onClick={() => { setSubjectForm(emptySubject); setSubjectModal("add"); }}><Plus size={15} /> Thêm môn</button>
           </div>
+
           <table style={s.table}>
             <thead><tr><th style={s.th}>Mã môn</th><th style={s.th}>Tên môn</th><th style={s.th}>Tín chỉ</th><th style={s.th}>Khoa</th><th style={s.th}>Thao tác</th></tr></thead>
             <tbody>
-              {subjectList.map(sub => (
+              {filteredSubjects.map(sub => (
                 <tr key={sub.id}>
                   <td style={{ ...s.td, fontWeight: 600, color: C.navy }}>{sub.code}</td>
                   <td style={s.td}>{sub.name}</td>
@@ -756,16 +930,20 @@ function ClassSubjectTabs() {
                   <td style={s.td}>
                     <div style={{ display: "flex", gap: 6 }}>
                       <button onClick={() => { setSubjectForm({ code: sub.code, name: sub.name, credits: sub.credits, faculty: sub.faculty }); setSubjectModal(sub.id); }} style={{ ...s.btn("ghost"), color: C.info }}><Pencil size={15} /></button>
-                      <button onClick={() => setSubjectList(l => l.filter(x => x.id !== sub.id))} style={{ ...s.btn("ghost"), color: C.danger }}><Trash2 size={15} /></button>
+                      <button onClick={() => handleScaleDeleteSubject(sub.id)} style={{ ...s.btn("ghost"), color: C.danger }}><Trash2 size={15} /></button>
                     </div>
                   </td>
                 </tr>
               ))}
+              {filteredSubjects.length === 0 && (
+                <tr><td colSpan={5} style={{ ...s.td, textAlign: "center", color: C.textSecondary }}>Không tìm thấy môn học phù hợp.</td></tr>
+              )}
             </tbody>
           </table>
         </>
       )}
 
+      {/* --- Các Modal giữ nguyên gốc --- */}
       {classModal !== null && (
         <Modal title={classModal === "add" ? "Thêm lớp học" : "Chỉnh sửa lớp học"} onClose={() => setClassModal(null)}>
           <div style={s.formGroup}>

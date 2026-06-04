@@ -17,17 +17,6 @@ public class ClassService : IClassService
     /// <summary>
     /// Retrieves all class records from the system.
     /// </summary>
-    /// <returns>
-    /// A <see cref="IReadOnlyList{T}"/> of <see cref="ClassDto"/> objects, each containing:
-    /// <list type="bullet">
-    ///   <item><description>Id</description></item>
-    ///   <item><description>ClassCode</description></item>
-    ///   <item><description>ClassName</description></item>
-    ///   <item><description>Major</description></item>
-    ///   <item><description>AcademicYear</description></item>
-    ///   <item><description>AcademicAdvisor</description></item>
-    /// </list>
-    /// </returns>
     public async Task<IReadOnlyList<ClassDto>> GetAllAsync()
     {
         var classes = await _unitOfWork.Classes.GetAllAsync();
@@ -46,19 +35,6 @@ public class ClassService : IClassService
     /// <summary>
     /// Retrieves a single class record by its unique identifier.
     /// </summary>
-    /// <param name="id">The unique integer identifier of the class.</param>
-    /// <returns>
-    /// A <see cref="ClassDto"/> object containing:
-    /// <list type="bullet">
-    ///   <item><description>Id</description></item>
-    ///   <item><description>ClassCode</description></item>
-    ///   <item><description>ClassName</description></item>
-    ///   <item><description>Major</description></item>
-    ///   <item><description>AcademicYear</description></item>
-    ///   <item><description>AcademicAdvisor</description></item>
-    /// </list>
-    /// Returns null if no class is found with the given id.
-    /// </returns>
     public async Task<ClassDto?> GetByIdAsync(int id)
     {
         var cls = await _unitOfWork.Classes.GetByIdAsync(id);
@@ -80,22 +56,6 @@ public class ClassService : IClassService
     /// <summary>
     /// Creates a new class record in the system.
     /// </summary>
-    /// <param name="dto">
-    /// The data transfer object (<see cref="CreateClassDto"/>) containing the details
-    /// required to create a new class record.
-    /// </param>
-    /// <returns>
-    /// A <see cref="ClassDto"/> object representing the newly created class, including:
-    /// <list type="bullet">
-    ///   <item><description>Id</description></item>
-    ///   <item><description>ClassCode</description></item>
-    ///   <item><description>ClassName</description></item>
-    ///   <item><description>Major</description></item>
-    ///   <item><description>AcademicYear</description></item>
-    ///   <item><description>AcademicAdvisor</description></item>
-    /// </list>
-    /// Throws an exception if the ClassCode already exists.
-    /// </returns>
     public async Task<ClassDto> CreateAsync(CreateClassDto dto)
     {
         var existedClass = await _unitOfWork.Classes.GetByClassCodeAsync(dto.ClassCode);
@@ -127,20 +87,8 @@ public class ClassService : IClassService
     }
 
     /// <summary>
-    /// Updates an existing class record by its unique identifier.
+    /// Updates an existing class record by its unique identifier (Cho phép sửa cả mã lớp).
     /// </summary>
-    /// <param name="id">The unique integer identifier of the class to update.</param>
-    /// <param name="dto">
-    /// The data transfer object (<see cref="UpdateClassDto"/>) containing the updated
-    /// details for the class record.
-    /// </param>
-    /// <returns>
-    /// A boolean value indicating the result of the update operation:
-    /// <list type="bullet">
-    ///   <item><description>true — if the class record was successfully updated</description></item>
-    ///   <item><description>false — if no class record was found with the given id</description></item>
-    /// </list>
-    /// </returns>
     public async Task<bool> UpdateAsync(int id, UpdateClassDto dto)
     {
         var cls = await _unitOfWork.Classes.GetByIdAsync(id);
@@ -148,6 +96,19 @@ public class ClassService : IClassService
         if (cls is null)
             return false;
 
+        // Nếu mã lớp bị thay đổi so với mã cũ trong database
+        if (cls.ClassCode != dto.ClassCode)
+        {
+            // Kiểm tra xem mã mới định đổi có bị trùng với một lớp khác sẵn có không
+            var duplicateCodeClass = await _unitOfWork.Classes.GetByClassCodeAsync(dto.ClassCode);
+            if (duplicateCodeClass is not null)
+            {
+                throw new Exception("Mã lớp mới bị trùng với một lớp học khác trong hệ thống.");
+            }
+        }
+
+        // Cập nhật tất cả các trường dữ liệu bao gồm cả ClassCode mới
+        cls.ClassCode = dto.ClassCode;
         cls.ClassName = dto.ClassName;
         cls.Major = dto.Major;
         cls.AcademicYear = dto.AcademicYear;
@@ -162,14 +123,6 @@ public class ClassService : IClassService
     /// <summary>
     /// Deletes an existing class record by its unique identifier.
     /// </summary>
-    /// <param name="id">The unique integer identifier of the class to delete.</param>
-    /// <returns>
-    /// A boolean value indicating the result of the delete operation:
-    /// <list type="bullet">
-    ///   <item><description>true — if the class record was successfully deleted</description></item>
-    ///   <item><description>false — if no class record was found with the given id</description></item>
-    /// </list>
-    /// </returns>
     public async Task<bool> DeleteAsync(int id)
     {
         var cls = await _unitOfWork.Classes.GetByIdAsync(id);
