@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 // Địa chỉ Base API của Backend .NET chạy local
-const API_BASE_URL = "http://localhost:5111";
+const API_BASE_URL = "http://20.89.102.198:5111";
 
 export type Role = "admin" | "giaovu" | "lecturer" | "student";
 
