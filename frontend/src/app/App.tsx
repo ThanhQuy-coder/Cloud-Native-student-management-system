@@ -344,7 +344,7 @@ function StudentTable() {
     try {
       setLoading(true);
       setError("");
-      const response = await fetch("http://localhost:5111/api/students", {
+      const response = await fetch("http://20.89.102.198:5111/api/students", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -366,7 +366,7 @@ function StudentTable() {
   const fetchClasses = async () => {
     try {
       // Lưu ý: Đổi lại URL này nếu endpoint lấy danh sách lớp của bạn khác /api/classes nhé!
-      const response = await fetch("http://localhost:5111/api/classes", {
+      const response = await fetch("http://20.89.102.198:5111/api/classes", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -422,7 +422,7 @@ function StudentTable() {
     try {
       let response;
       if (editingStudent) {
-        response = await fetch(`http://localhost:5111/api/students/${editingStudent.id}`, {
+        response = await fetch(`http://20.89.102.198:5111/api/students/${editingStudent.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -431,7 +431,7 @@ function StudentTable() {
           body: JSON.stringify(payload)
         });
       } else {
-        response = await fetch("http://localhost:5111/api/students", {
+        response = await fetch("http://20.89.102.198:5111/api/students", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -459,7 +459,7 @@ function StudentTable() {
   const handleDelete = async (id: number) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa sinh viên này không?")) return;
     try {
-      const response = await fetch(`http://localhost:5111/api/students/${id}`, {
+      const response = await fetch(`http://20.89.102.198:5111/api/students/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${user?.token}` }
       });
@@ -684,7 +684,7 @@ function ClassSubjectTabs() {
   const [subjectForm, setSubjectForm] = useState(emptySubject);
 
   const token = user?.token || "";
-  const API_BASE_URL = "http://localhost:5111";
+  const API_BASE_URL = "http://20.89.102.198:5111";
 
   const fetchClasses = async () => {
     if (!token) return;
