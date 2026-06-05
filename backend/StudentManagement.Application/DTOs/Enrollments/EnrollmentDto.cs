@@ -17,4 +17,8 @@ public class EnrollmentDto
     public string SubjectName { get; set; } = null!;
 
     public int Credits { get; set; }
+
+    public string Semester { get; set; } = null!;
+
+    public string Status { get; set; } = null!;
 }

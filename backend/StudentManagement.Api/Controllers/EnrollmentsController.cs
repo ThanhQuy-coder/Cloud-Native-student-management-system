@@ -57,6 +57,36 @@ public class EnrollmentsController : BaseController
         }
     }
 
+    [Authorize(Roles = "Student")]
+    [HttpPost("api/students/me/subjects")]
+    public async Task<IActionResult> CreateForCurrentStudent(CreateEnrollmentDto dto)
+    {
+        var currentUserId = GetCurrentUserId();
+
+        if (currentUserId is null)
+            return Unauthorized();
+
+        var currentStudentId = await _studentService.GetStudentIdByUserIdAsync(currentUserId.Value);
+
+        if (currentStudentId is null)
+            return NotFound("Student profile chưa được liên kết với tài khoản.");
+
+        dto.StudentId = currentStudentId.Value;
+
+        try
+        {
+            var enrollment = await _enrollmentService.CreateAsync(dto);
+
+            return Created(
+                $"api/enrollments/{enrollment.Id}",
+                enrollment);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     /// <summary>
     /// Retrieves all subjects that a student is enrolled in by their unique identifier.
     /// </summary>
@@ -102,6 +132,25 @@ public class EnrollmentsController : BaseController
         {
             return NotFound(ex.Message);
         }
+    }
+
+    [Authorize(Roles = "Student")]
+    [HttpGet("api/students/me/subjects")]
+    public async Task<IActionResult> GetCurrentStudentSubjects()
+    {
+        var currentUserId = GetCurrentUserId();
+
+        if (currentUserId is null)
+            return Unauthorized();
+
+        var currentStudentId = await _studentService.GetStudentIdByUserIdAsync(currentUserId.Value);
+
+        if (currentStudentId is null)
+            return NotFound("Student profile chưa được liên kết với tài khoản.");
+
+        var subjects = await _enrollmentService.GetSubjectsByStudentIdAsync(currentStudentId.Value);
+
+        return Ok(subjects);
     }
 
     /// <summary>

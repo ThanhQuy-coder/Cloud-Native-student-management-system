@@ -25,6 +25,16 @@ namespace StudentManagement.Domain.Entities
         public Course Course { get; set; } = null!;
 
         /// <summary>
+        /// Academic semester for the enrollment.
+        /// </summary>
+        public string Semester { get; set; } = "HK1 2026";
+
+        /// <summary>
+        /// Registration status for the enrollment.
+        /// </summary>
+        public string Status { get; set; } = "Đang học";
+
+        /// <summary>
         /// Score for process/continuous assessment
         /// </summary>
         public decimal? ProcessScore { get; set; }

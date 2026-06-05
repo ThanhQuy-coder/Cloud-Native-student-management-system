@@ -57,9 +57,12 @@ public class AuthService : IAuthService
 
         var token = _jwtTokenService.GenerateToken(user);
 
+        var student = await _unitOfWork.Students.GetByUserIdAsync(user.Id);
+
         return new AuthDto
         {
             UserId = user.Id,
+            StudentId = student?.Id,
             Username = user.Username,
             RoleName = user.Role.RoleName,
             Token = token
@@ -110,11 +113,17 @@ public class AuthService : IAuthService
 
         var createdUser = await _unitOfWork.Users.GetByUsernameAsync(user.Username);
 
-        var token = _jwtTokenService.GenerateToken(createdUser!);
+        if (createdUser is null)
+            throw new Exception("Không thể tải lại user vừa tạo.");
+
+        var token = _jwtTokenService.GenerateToken(createdUser);
+
+        var student = await _unitOfWork.Students.GetByUserIdAsync(createdUser.Id);
 
         return new AuthDto
         {
-            UserId = createdUser!.Id,
+            UserId = createdUser.Id,
+            StudentId = student?.Id,
             Username = createdUser.Username,
             RoleName = createdUser.Role.RoleName,
             Token = token

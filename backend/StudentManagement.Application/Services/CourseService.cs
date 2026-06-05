@@ -21,16 +21,14 @@ public class CourseService : ICourseService
     {
         var courses = await _unitOfWork.Courses.GetAllAsync();
 
-        return courses.Select(x => new SubjectDto
-        {
-            Id = x.Id,
-            SubjectCode = x.CourseCode,
-            SubjectName = x.CourseName,
-            Credits = x.Credits,
-            Description = x.Description,
-            TeacherId = x.TeacherId,
-            Status = x.Status
-        }).ToList();
+        return courses.Select(MapToDto).ToList();
+    }
+
+    public async Task<IReadOnlyList<SubjectDto>> GetByTeacherIdAsync(int teacherId)
+    {
+        var courses = await _unitOfWork.Courses.GetByTeacherIdAsync(teacherId);
+
+        return courses.Select(MapToDto).ToList();
     }
 
     /// <summary>
@@ -43,16 +41,7 @@ public class CourseService : ICourseService
         if (course is null)
             return null;
 
-        return new SubjectDto
-        {
-            Id = course.Id,
-            SubjectCode = course.CourseCode,
-            SubjectName = course.CourseName,
-            Credits = course.Credits,
-            Description = course.Description,
-            TeacherId = course.TeacherId,
-            Status = course.Status
-        };
+        return MapToDto(course);
     }
 
     /// <summary>
@@ -78,16 +67,7 @@ public class CourseService : ICourseService
         await _unitOfWork.Courses.AddAsync(course);
         await _unitOfWork.SaveChangesAsync();
 
-        return new SubjectDto
-        {
-            Id = course.Id,
-            SubjectCode = course.CourseCode,
-            SubjectName = course.CourseName,
-            Credits = course.Credits,
-            Description = course.Description,
-            TeacherId = course.TeacherId,
-            Status = course.Status
-        };
+        return MapToDto(course);
     }
 
     /// <summary>
@@ -139,5 +119,19 @@ public class CourseService : ICourseService
         await _unitOfWork.SaveChangesAsync();
 
         return true;
+    }
+
+    private static SubjectDto MapToDto(Course course)
+    {
+        return new SubjectDto
+        {
+            Id = course.Id,
+            SubjectCode = course.CourseCode,
+            SubjectName = course.CourseName,
+            Credits = course.Credits,
+            Description = course.Description,
+            TeacherId = course.TeacherId,
+            Status = course.Status
+        };
     }
 }

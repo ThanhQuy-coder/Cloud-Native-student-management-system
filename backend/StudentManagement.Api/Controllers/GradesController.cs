@@ -138,4 +138,23 @@ public class GradesController : BaseController
             return NotFound(ex.Message);
         }
     }
+
+    [Authorize(Roles = "Student")]
+    [HttpGet("api/students/me/grades")]
+    public async Task<IActionResult> GetCurrentStudentGrades()
+    {
+        var currentUserId = GetCurrentUserId();
+
+        if (currentUserId is null)
+            return Unauthorized();
+
+        var currentStudentId = await _studentService.GetStudentIdByUserIdAsync(currentUserId.Value);
+
+        if (currentStudentId is null)
+            return NotFound("Student profile chưa được liên kết với tài khoản.");
+
+        var grades = await _gradeService.GetGradesByStudentIdAsync(currentStudentId.Value);
+
+        return Ok(grades);
+    }
 }

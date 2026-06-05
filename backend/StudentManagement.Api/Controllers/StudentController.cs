@@ -88,6 +88,25 @@ public class StudentsController : BaseController
         return Ok(student);
     }
 
+    [Authorize(Roles = "Student")]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMe()
+    {
+        var currentUserId = GetCurrentUserId();
+
+        if (currentUserId is null)
+            return Unauthorized();
+
+        var currentStudentId = await _studentService.GetStudentIdByUserIdAsync(currentUserId.Value);
+
+        if (currentStudentId is null)
+            return NotFound("Student profile chưa được liên kết với tài khoản.");
+
+        var student = await _studentService.GetByIdAsync(currentStudentId.Value);
+
+        return student is null ? NotFound() : Ok(student);
+    }
+
     /// <summary>
     /// Creates a new student record in the system.
     /// </summary>

@@ -8,7 +8,7 @@ namespace StudentManagement.Api.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/subjects")]
-public class SubjectsController : ControllerBase
+public class SubjectsController : BaseController
 {
     private readonly ICourseService _courseService;
 
@@ -37,6 +37,20 @@ public class SubjectsController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var subjects = await _courseService.GetAllAsync();
+
+        return Ok(subjects);
+    }
+
+    [Authorize(Roles = "Teacher")]
+    [HttpGet("my-teaching")]
+    public async Task<IActionResult> GetMyTeachingSubjects()
+    {
+        var currentUserId = GetCurrentUserId();
+
+        if (currentUserId is null)
+            return Unauthorized();
+
+        var subjects = await _courseService.GetByTeacherIdAsync(currentUserId.Value);
 
         return Ok(subjects);
     }

@@ -19,6 +19,14 @@ namespace StudentManagement.Infrastructure.Configurations
 
             builder.HasKey(x => x.Id);
 
+            builder.Property(x => x.Semester)
+                .HasMaxLength(30)
+                .IsRequired();
+
+            builder.Property(x => x.Status)
+                .HasMaxLength(30)
+                .IsRequired();
+
             builder.Property(x => x.ProcessScore)
                 .HasPrecision(4, 2);
 

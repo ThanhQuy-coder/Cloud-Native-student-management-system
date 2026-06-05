@@ -158,6 +158,7 @@ public class GradeService : IGradeService
             SubjectId = enrollment.CourseId,
             SubjectCode = enrollment.Course.CourseCode,
             SubjectName = enrollment.Course.CourseName,
+            Semester = enrollment.Semester,
 
             ProcessScore = enrollment.ProcessScore,
             MidtermScore = enrollment.MidtermScore,

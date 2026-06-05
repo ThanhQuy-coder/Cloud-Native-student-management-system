@@ -11,6 +11,7 @@ public class GradeDto
     public int SubjectId { get; set; }
     public string SubjectCode { get; set; } = null!;
     public string SubjectName { get; set; } = null!;
+    public string Semester { get; set; } = null!;
 
     public decimal? ProcessScore { get; set; }
     public decimal? MidtermScore { get; set; }

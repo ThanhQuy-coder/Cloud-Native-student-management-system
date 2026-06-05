@@ -6,6 +6,8 @@ public interface ICourseService
 {
     Task<IReadOnlyList<SubjectDto>> GetAllAsync();
 
+    Task<IReadOnlyList<SubjectDto>> GetByTeacherIdAsync(int teacherId);
+
     Task<SubjectDto?> GetByIdAsync(int id);
 
     Task<SubjectDto> CreateAsync(CreateSubjectDto dto);

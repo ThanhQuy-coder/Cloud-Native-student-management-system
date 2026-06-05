@@ -58,7 +58,9 @@ public class EnrollmentService : IEnrollmentService
         var enrollment = new Enrollment
         {
             StudentId = dto.StudentId,
-            CourseId = dto.SubjectId
+            CourseId = dto.SubjectId,
+            Semester = string.IsNullOrWhiteSpace(dto.Semester) ? "HK1 2026" : dto.Semester.Trim(),
+            Status = "Đang học"
         };
 
         await _unitOfWork.Enrollments.AddAsync(enrollment);
@@ -73,7 +75,9 @@ public class EnrollmentService : IEnrollmentService
             SubjectId = course.Id,
             SubjectCode = course.CourseCode,
             SubjectName = course.CourseName,
-            Credits = course.Credits
+            Credits = course.Credits,
+            Semester = enrollment.Semester,
+            Status = enrollment.Status
         };
     }
 
@@ -113,7 +117,9 @@ public class EnrollmentService : IEnrollmentService
             SubjectId = x.CourseId,
             SubjectCode = x.Course.CourseCode,
             SubjectName = x.Course.CourseName,
-            Credits = x.Course.Credits
+            Credits = x.Course.Credits,
+            Semester = x.Semester,
+            Status = x.Status
         }).ToList();
     }
 
