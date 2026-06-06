@@ -1,4 +1,4 @@
-export const API_BASE_URL = "http://localhost:5111";
+export const API_BASE_URL = "http://20.89.102.198:5111";
 
 export type Role = "admin" | "giaovu" | "lecturer" | "student";
 

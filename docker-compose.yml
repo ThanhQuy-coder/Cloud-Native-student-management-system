@@ -1,0 +1,62 @@
+version: '3.9'
+
+services:
+  db_mysql:
+    image: mysql:8.1
+    container_name: cn_student_db
+    restart: unless-stopped
+    command: --lower_case_table_names=1
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_DATABASE: student_management
+    ports:
+      - '3306:3306'
+    volumes:
+      - db_data:/var/lib/mysql
+      # - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      # - ./database/seed.sql:/docker-entrypoint-initdb.d/seed.sql:ro
+    healthcheck:
+      # ĐÃ SỬA: Bổ sung -u root và -p123456 (viết dính liền) để lệnh ping không bị từ chối quyền truy cập (Access Denied)
+      test: [ 'CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p123456' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cn-network # ĐÃ SỬA: Đưa Database vào chung mạng cn-network để Backend có thể nhìn thấy và kết nối tới
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cn_student_backend
+    depends_on:
+      db_mysql:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:80
+    ports:
+      - '5111:80'
+    restart: unless-stopped
+    networks:
+      - cn-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cn_student_frontend
+    depends_on:
+      - backend
+    ports:
+      - '5173:80'
+    restart: unless-stopped
+    networks:
+      - cn-network
+
+volumes:
+  db_data:
+
+networks:
+  cn-network:
+    driver: bridge
