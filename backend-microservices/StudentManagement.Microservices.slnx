@@ -1,4 +1,5 @@
 <Solution>
-    <Project Path="ApiGateway\ApiGateway.csproj" />
+    <Project Path="Services\StudentService\StudentService.csproj" />
     <Project Path="Services\AuthService\AuthService.csproj" />
+    <Project Path="ApiGateway\ApiGateway.csproj" />
 </Solution>

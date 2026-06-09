@@ -1,11 +1,10 @@
-using Microsoft.EntityFrameworkCore;
-using AuthService.Data;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using AuthService.Services;
-using AuthService.Repositories;
-using Scalar.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using StudentService.Data;
+using StudentService.Repositories;
+using StudentService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var jwtKey = builder.Configuration["Jwt:Key"]!;
@@ -19,12 +18,11 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(allowOrigin)
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials(); // Hỗ trợ nếu sau này bạn dùng Cookie/Credentials
+              .AllowCredentials();
     });
 });
 
-builder.Services.AddOpenApi();
-builder.Services.AddDbContext<AuthDbContext>(options =>
+builder.Services.AddDbContext<StudentDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -34,7 +32,6 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
     );
 });
 
-// Configure JWT authentication with validation rules
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -52,30 +49,27 @@ builder.Services
         };
     });
 
+builder.Services.AddOpenApi();
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
-builder.Services.AddScoped<IAuthService, AuthServiceImpl>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IStudentService, StudentServiceImp>();
+builder.Services.AddScoped<IClassService, ClassService>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IClassRepository, ClassRepository>();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference();
 }
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
-
+app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
+
+public partial class Program { } // Supports Integration testing

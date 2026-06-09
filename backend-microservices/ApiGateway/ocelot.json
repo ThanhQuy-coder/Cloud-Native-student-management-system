@@ -11,6 +11,30 @@
       ],
       "UpstreamPathTemplate": "/gateway/auth/{everything}",
       "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
+    },
+    {
+      "DownstreamPathTemplate": "/api/students/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5190
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/students/{everything}",
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
+    },
+    {
+      "DownstreamPathTemplate": "/api/classes/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5190
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/classes/{everything}",
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
     }
   ],
   "GlobalConfiguration": {

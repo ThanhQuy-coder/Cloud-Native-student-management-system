@@ -5,7 +5,7 @@ using AuthService.Models;
 using AuthService.Services;
 using Microsoft.IdentityModel.Tokens;
 
-namespace StudentManagement.Infrastructure.Services;
+namespace AuthService.Services;
 
 public class JwtTokenService : IJwtTokenService
 {
