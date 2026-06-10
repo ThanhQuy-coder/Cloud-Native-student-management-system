@@ -58,6 +58,7 @@ builder.Services.AddScoped<IStudentService, StudentServiceImp>();
 builder.Services.AddScoped<IClassService, ClassService>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
+builder.Services.AddHostedService<StudentUserCreatedConsumer>();
 
 var app = builder.Build();
 
@@ -66,10 +67,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+// app.UseCors("AllowReactVite");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
-
-public partial class Program { } // Supports Integration testing

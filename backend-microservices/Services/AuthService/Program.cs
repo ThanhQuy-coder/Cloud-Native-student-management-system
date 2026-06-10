@@ -60,6 +60,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IRabbitMqPublisher, RabbitMqPublisher>();
 
 var app = builder.Build();
 
@@ -69,13 +70,10 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+// app.UseCors("AllowReactVite");
 app.UseAuthentication();
 app.UseAuthorization();
-
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
+app.UseHttpsRedirection();
 
 app.MapControllers();
 app.Run();

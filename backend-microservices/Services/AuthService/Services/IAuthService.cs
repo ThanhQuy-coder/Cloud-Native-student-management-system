@@ -7,5 +7,7 @@ namespace AuthService.Services
         Task<AuthDto?> LoginAsync(LoginDto dto);
 
         Task<AuthDto?> RegisterAsync(RegisterDto dto);
+
+        Task<AuthDto?> RegisterStudentAsync(RegisterStudentDto dto);
     }
 }

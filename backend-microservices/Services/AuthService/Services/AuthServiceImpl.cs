@@ -1,5 +1,6 @@
 using AuthService.DTOs;
 using AuthService.Models;
+using AuthService.Models.Events;
 using AuthService.Repositories;
 using Microsoft.AspNetCore.Identity;
 
@@ -10,13 +11,16 @@ public class AuthServiceImpl : IAuthService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly PasswordHasher<User> _passwordHasher = new();
+    private readonly IRabbitMqPublisher _rabbitMqPublisher;
 
     public AuthServiceImpl(
         IUnitOfWork unitOfWork,
-        IJwtTokenService jwtTokenService)
+        IJwtTokenService jwtTokenService,
+        IRabbitMqPublisher rabbitMqPublisher)
     {
         _unitOfWork = unitOfWork;
         _jwtTokenService = jwtTokenService;
+        _rabbitMqPublisher = rabbitMqPublisher;
     }
 
     /// <summary>
@@ -90,6 +94,48 @@ public class AuthServiceImpl : IAuthService
         if (existedUser is not null)
             return null;
 
+        if (dto.Role == null) dto.Role = "Student";
+
+        var defaultRole = await _unitOfWork.Roles.GetByRoleNameAsync(dto.Role);
+
+        if (defaultRole is null)
+            throw new Exception("Default role 'Student' chưa tồn tại trong database.");
+
+        var user = new User
+        {
+            Username = dto.Username,
+            RoleId = defaultRole.Id,
+            IsActive = true
+        };
+
+        user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
+
+        await _unitOfWork.Users.AddAsync(user);
+        await _unitOfWork.SaveChangesAsync();
+
+        var createdUser = await _unitOfWork.Users.GetByUsernameAsync(user.Username);
+
+        if (createdUser is null)
+            throw new Exception("Không thể tải lại user vừa tạo.");
+
+        var token = _jwtTokenService.GenerateToken(createdUser);
+
+        return new AuthDto
+        {
+            UserId = createdUser.Id,
+            Username = createdUser.Username,
+            RoleName = createdUser.Role.RoleName,
+            Token = token
+        };
+    }
+
+    public async Task<AuthDto?> RegisterStudentAsync(RegisterStudentDto dto)
+    {
+        var existedUser = await _unitOfWork.Users.GetByUsernameAsync(dto.Username);
+
+        if (existedUser is not null)
+            return null;
+
         var defaultRole = await _unitOfWork.Roles.GetByRoleNameAsync("Student");
 
         if (defaultRole is null)
@@ -113,6 +159,15 @@ public class AuthServiceImpl : IAuthService
             throw new Exception("Không thể tải lại user vừa tạo.");
 
         var token = _jwtTokenService.GenerateToken(createdUser);
+
+        await _rabbitMqPublisher.PublishStudentUserCreatedAsync(new StudentUserCreatedEvent
+        {
+            UserId = createdUser.Id,
+            FullName = dto.FullName,
+            Email = dto.Email,
+            Dob = dto.Dob,
+            Gender = dto.Gender
+        });
 
         return new AuthDto
         {

@@ -1,5 +1,6 @@
 using AuthService.DTOs;
 using AuthService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthService.Controllers;
@@ -48,10 +49,23 @@ public class AuthController : ControllerBase
     /// UserId, Username, RoleName, and JWT Token.
     /// Returns an error if the username already exists.
     /// </returns>
+    [Authorize(Roles = "Admin")]
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDto dto)
     {
         var result = await _authService.RegisterAsync(dto);
+
+        if (result is null)
+            return BadRequest("Username đã tồn tại.");
+
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "Admin,Staff")]
+    [HttpPost("register-student")]
+    public async Task<IActionResult> RegisterStudent(RegisterStudentDto dto)
+    {
+        var result = await _authService.RegisterStudentAsync(dto);
 
         if (result is null)
             return BadRequest("Username đã tồn tại.");

@@ -46,6 +46,7 @@ public class StudentRepository : IStudentRepository
     /// <param name="entity">The <see cref="Student"/> entity to add.</param>
     public async Task AddAsync(Student entity)
     {
+        entity.StudentCode = $"SV{entity.Id:D6}";
         await _context.Students.AddAsync(entity);
     }
 
