@@ -1,6 +1,9 @@
 <Solution>
-    <Project Path="Services\StudentService\StudentService.csproj" />
-    <Project Path="Services\AuthService\AuthService.csproj" />
-    <Project Path="Services\AcademicService\AcademicService.csproj" />
+    <Folder Name="/Services/">
+        <Project Path="Services/EnrollmentService/EnrollmentService.csproj" />
+        <Project Path="StudentService/StudentService.csproj" />
+        <Project Path="AuthService/AuthService.csproj" />
+        <Project Path="AcademicService/AcademicService.csproj" />
+    </Folder>
     <Project Path="ApiGateway\ApiGateway.csproj" />
 </Solution>
