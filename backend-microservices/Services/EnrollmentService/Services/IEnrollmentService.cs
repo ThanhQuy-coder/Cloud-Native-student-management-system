@@ -8,5 +8,7 @@ public interface IEnrollmentService
 
     Task<IReadOnlyList<EnrollmentDto>> GetSubjectsByStudentIdAsync(int studentId);
 
+    Task<int?> GetStudentIdByUserIdAsync(int userId);
+
     Task<bool> DeleteAsync(int id);
 }

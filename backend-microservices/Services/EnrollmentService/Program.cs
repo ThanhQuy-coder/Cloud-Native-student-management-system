@@ -55,6 +55,7 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentServiceImp>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
+builder.Services.AddHostedService<StudentProfileCreatedConsumer>();
 
 var app = builder.Build();
 
@@ -68,5 +69,6 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHttpsRedirection();
+app.MapControllers();
 
 app.Run();

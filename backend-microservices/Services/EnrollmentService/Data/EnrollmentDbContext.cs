@@ -15,6 +15,7 @@ public class EnrollmentDbContext : DbContext
     }
 
     public DbSet<Enrollment> Enrollments => Set<Enrollment>();
+    public DbSet<StudentReference> StudentReferences => Set<StudentReference>();
 
     /// <summary>
     /// Configures the entity model by applying configurations from the assembly.

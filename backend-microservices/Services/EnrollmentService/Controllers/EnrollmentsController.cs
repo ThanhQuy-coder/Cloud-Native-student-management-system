@@ -65,8 +65,14 @@ public class EnrollmentsController : BaseController
         if (currentUserId is null)
             return Unauthorized();
 
+        var currentStudentId = await _enrollmentService.GetStudentIdByUserIdAsync(currentUserId.Value);
+
+        if (currentStudentId is null)
+            return NotFound("Student profile is not linked to this account.");
+
         try
         {
+            dto.StudentId = currentStudentId.Value;
             var enrollment = await _enrollmentService.CreateAsync(dto);
 
             return Created(
@@ -97,7 +103,6 @@ public class EnrollmentsController : BaseController
     /// </list>
     /// If no subjects are found for the given student id, returns a NotFound result.
     /// </returns>
-    // TODO: Security Student
     [Authorize(Roles = "Admin,Staff,Teacher,Student")]
     [HttpGet("api/students/{id:int}/subjects")]
     public async Task<IActionResult> GetSubjectsByStudentId(int id)
@@ -109,11 +114,13 @@ public class EnrollmentsController : BaseController
             if (currentUserId is null)
                 return Unauthorized();
 
-            // ! Compare param id request and id in JWT
-            // var currentStudentId = await _studentService.GetStudentIdByUserIdAsync(currentUserId.Value);
+            var currentStudentId = await _enrollmentService.GetStudentIdByUserIdAsync(currentUserId.Value);
 
-            // if (currentStudentId != id)
-            //     return Forbid();
+            if (currentStudentId is null)
+                return NotFound("Student profile is not linked to this account.");
+
+            if (currentStudentId.Value != id)
+                return Forbid();
         }
 
         try
@@ -128,7 +135,6 @@ public class EnrollmentsController : BaseController
         }
     }
 
-    // TODO: Security Student
     [Authorize(Roles = "Student")]
     [HttpGet("api/students/me/subjects")]
     public async Task<IActionResult> GetCurrentStudentSubjects()
@@ -138,15 +144,16 @@ public class EnrollmentsController : BaseController
         if (currentUserId is null)
             return Unauthorized();
 
-        // var currentStudentId = await _studentService.GetStudentIdByUserIdAsync(currentUserId.Value);
-
-        // if (currentStudentId is null)
         //     return NotFound("Student profile chưa được liên kết với tài khoản.");
 
-        // var subjects = await _enrollmentService.GetSubjectsByStudentIdAsync(currentStudentId.Value);
+        var currentStudentId = await _enrollmentService.GetStudentIdByUserIdAsync(currentUserId.Value);
 
-        // ! return Ok(subjects);
-        return NoContent();
+        if (currentStudentId is null)
+            return NotFound("Student profile is not linked to this account.");
+
+        var subjects = await _enrollmentService.GetSubjectsByStudentIdAsync(currentStudentId.Value);
+
+        return Ok(subjects);
     }
 
     /// <summary>

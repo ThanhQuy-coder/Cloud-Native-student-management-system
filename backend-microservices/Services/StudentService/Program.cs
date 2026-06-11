@@ -58,6 +58,7 @@ builder.Services.AddScoped<IStudentService, StudentServiceImp>();
 builder.Services.AddScoped<IClassService, ClassService>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
+builder.Services.AddSingleton<IRabbitMqPublisher, RabbitMqPublisher>();
 builder.Services.AddHostedService<StudentUserCreatedConsumer>();
 
 var app = builder.Build();

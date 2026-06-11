@@ -1,27 +1,24 @@
 using System.Text;
 using System.Text.Json;
+using EnrollmentService.Data;
+using EnrollmentService.Models;
 using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using StudentService.Data;
-using StudentService.Models;
-using StudentService.Models.Events;
 
-namespace StudentService.Services;
+namespace EnrollmentService.Services;
 
-public class StudentUserCreatedConsumer : BackgroundService
+public class StudentProfileCreatedConsumer : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IConfiguration _configuration;
-    private readonly IRabbitMqPublisher _rabbitMqPublisher;
 
-    public StudentUserCreatedConsumer(
+    public StudentProfileCreatedConsumer(
         IServiceScopeFactory scopeFactory,
-        IConfiguration configuration, IRabbitMqPublisher rabbitMqPublisher)
+        IConfiguration configuration)
     {
         _scopeFactory = scopeFactory;
         _configuration = configuration;
-        _rabbitMqPublisher = rabbitMqPublisher;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -69,38 +66,27 @@ public class StudentUserCreatedConsumer : BackgroundService
         {
             var json = Encoding.UTF8.GetString(eventArgs.Body.ToArray());
 
-            var message = JsonSerializer.Deserialize<StudentUserCreatedEvent>(json);
+            var message = JsonSerializer.Deserialize<StudentProfileCreatedEvent>(json);
 
             if (message is null)
                 return;
 
             using var scope = _scopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<StudentDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<EnrollmentDbContext>();
 
-            var exists = await db.Students
-                .AnyAsync(s => s.UserId == message.UserId, stoppingToken);
+            var exists = await db.StudentReferences
+                    .AnyAsync(x => x.UserId == message.UserId);
 
             if (!exists)
             {
-                var student = new Student
+                db.StudentReferences.Add(new StudentReference
                 {
                     UserId = message.UserId,
-                    StudentCode = $"SV{message.UserId:D6}",
-                    FullName = message.FullName,
-                    Email = message.Email,
-                    Dob = message.Dob,
-                    Gender = message.Gender
-                };
-
-                db.Students.Add(student);
-                await db.SaveChangesAsync(stoppingToken);
-
-                await _rabbitMqPublisher.PublishStudentProfileCreated(new StudentProfileCreatedEvent
-                {
-                    UserId = (int)student.UserId,
-                    StudentId = student.Id,
-                    StudentCode = student.StudentCode
+                    StudentId = message.StudentId,
+                    StudentCode = message.StudentCode
                 });
+
+                await db.SaveChangesAsync();
             }
         };
 

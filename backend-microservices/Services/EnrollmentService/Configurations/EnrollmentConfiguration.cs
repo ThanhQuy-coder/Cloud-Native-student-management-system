@@ -2,7 +2,7 @@ using EnrollmentService.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace StudentManagement.Infrastructure.Configurations
+namespace EnrollmentService.Configurations
 {
     /// <summary>
     /// Defines the entity configuration for the <see cref="Enrollment"/> entity in the database.

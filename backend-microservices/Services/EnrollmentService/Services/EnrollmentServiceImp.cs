@@ -1,16 +1,22 @@
 using EnrollmentService.DTOs;
+using EnrollmentService.Data;
 using EnrollmentService.Models;
 using EnrollmentService.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace EnrollmentService.Services;
 
 public class EnrollmentServiceImp : IEnrollmentService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly EnrollmentDbContext _dbContext;
 
-    public EnrollmentServiceImp(IUnitOfWork unitOfWork)
+    public EnrollmentServiceImp(
+        IUnitOfWork unitOfWork,
+        EnrollmentDbContext dbContext)
     {
         _unitOfWork = unitOfWork;
+        _dbContext = dbContext;
     }
 
     /// <summary>
@@ -59,7 +65,7 @@ public class EnrollmentServiceImp : IEnrollmentService
         {
             Id = enrollment.Id,
             StudentId = dto.StudentId,
-            SubjectId = dto.StudentId,
+            SubjectId = dto.SubjectId,
             Semester = enrollment.Semester,
             Status = enrollment.Status
         };
@@ -95,6 +101,14 @@ public class EnrollmentServiceImp : IEnrollmentService
             Semester = x.Semester,
             Status = x.Status
         }).ToList();
+    }
+
+    public async Task<int?> GetStudentIdByUserIdAsync(int userId)
+    {
+        return await _dbContext.StudentReferences
+            .Where(x => x.UserId == userId)
+            .Select(x => (int?)x.StudentId)
+            .FirstOrDefaultAsync();
     }
 
     /// <summary>
