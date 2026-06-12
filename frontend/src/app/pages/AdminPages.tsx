@@ -20,10 +20,10 @@ export function AdminDashboard() {
   useEffect(() => {
     if (!user?.token) return;
     Promise.all([
-      api.get<ApiStudent[]>("/api/students", user.token),
-      api.get<ApiClass[]>("/api/classes", user.token),
-      api.get<ApiSubject[]>("/api/subjects", user.token),
-      api.get<ApiUser[]>("/api/users", user.token)
+      api.get<ApiStudent[]>("/gateway/students", user.token),
+      api.get<ApiClass[]>("/gateway/classes", user.token),
+      api.get<ApiSubject[]>("/gateway/subjects", user.token),
+      api.get<ApiUser[]>("/gateway/users", user.token)
     ]).then(([studentData, classData, subjectData, accountData]) => {
       setStudents(studentData);
       setClasses(classData);
@@ -74,7 +74,7 @@ export function AccountManagement() {
   const [modal, setModal] = useState<null | "add" | number>(null);
   const [form, setForm] = useState(emptyAccount);
 
-  const load = () => user?.token && api.get<ApiUser[]>("/api/users", user.token).then(setList).catch(err => alert(err.message));
+  const load = () => user?.token && api.get<ApiUser[]>("/gateway/users", user.token).then(setList).catch(err => alert(err.message));
   useEffect(() => { load(); }, [user?.token]);
 
   const filtered = list.filter(a => a.username.toLowerCase().includes(search.toLowerCase()) || a.roleName.toLowerCase().includes(search.toLowerCase()));
@@ -90,9 +90,9 @@ export function AccountManagement() {
     try {
       if (modal === "add") {
         if (!form.password.trim()) return alert("Mật khẩu là bắt buộc khi tạo tài khoản.");
-        await api.post("/api/users", { ...body, password: form.password }, user.token);
+        await api.post("/gateway/users", { ...body, password: form.password }, user.token);
       } else if (typeof modal === "number") {
-        await api.put(`/api/users/${modal}`, body, user.token);
+        await api.put(`/gateway/users/${modal}`, body, user.token);
       }
       setModal(null);
       setForm(emptyAccount);
@@ -104,7 +104,7 @@ export function AccountManagement() {
 
   async function remove(id: number) {
     if (!user?.token || !window.confirm("Xóa tài khoản này?")) return;
-    await api.delete(`/api/users/${id}`, user.token);
+    await api.delete(`/gateway/users/${id}`, user.token);
     setList(prev => prev.filter(x => x.id !== id));
   }
 
@@ -166,7 +166,7 @@ export function AdminReports() {
 
   useEffect(() => {
     if (!user?.token) return;
-    api.get<ApiStudent[]>("/api/students", user.token).then(setStudents).catch(console.error);
+    api.get<ApiStudent[]>("/gateway/students", user.token).then(setStudents).catch(console.error);
   }, [user?.token]);
 
   const byClass = Object.entries(students.reduce<Record<string, number>>((acc, st) => {

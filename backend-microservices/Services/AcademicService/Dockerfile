@@ -4,9 +4,8 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
-COPY Services/AcademicService/AcademicService.csproj Services/AcademicService/
-RUN dotnet restore Services/AcademicService/AcademicService.csproj
 COPY . .
+RUN dotnet restore Services/AcademicService/AcademicService.csproj
 RUN dotnet publish Services/AcademicService/AcademicService.csproj -c Release -o /app/publish --no-restore
 
 FROM base AS final

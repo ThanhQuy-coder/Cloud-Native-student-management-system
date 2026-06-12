@@ -21,7 +21,7 @@ export function StudentManagementPage() {
 
   const load = () => {
     if (!user?.token) return;
-    Promise.all([api.get<ApiStudent[]>("/api/students", user.token), api.get<ApiClass[]>("/api/classes", user.token)])
+    Promise.all([api.get<ApiStudent[]>("/gateway/students", user.token), api.get<ApiClass[]>("/gateway/classes", user.token)])
       .then(([studentData, classData]) => { setStudents(studentData); setClasses(classData); })
       .catch(err => alert(err.message));
   };
@@ -48,8 +48,8 @@ export function StudentManagementPage() {
       userId: null
     };
     try {
-      if (modal === "add") await api.post("/api/students", body, user.token);
-      else if (typeof modal === "number") await api.put(`/api/students/${modal}`, body, user.token);
+      if (modal === "add") await api.post("/gateway/students", body, user.token);
+      else if (typeof modal === "number") await api.put(`/gateway/students/${modal}`, body, user.token);
       setModal(null);
       setForm(emptyStudent);
       load();
@@ -60,7 +60,7 @@ export function StudentManagementPage() {
 
   async function remove(id: number) {
     if (!user?.token || !window.confirm("Xóa sinh viên này?")) return;
-    await api.delete(`/api/students/${id}`, user.token);
+    await api.delete(`/gateway/students/${id}`, user.token);
     setStudents(prev => prev.filter(x => x.id !== id));
   }
 
@@ -103,7 +103,7 @@ export function ClassSubjectManagementPage() {
 
   const load = () => {
     if (!user?.token) return;
-    Promise.all([api.get<ApiClass[]>("/api/classes", user.token), api.get<ApiSubject[]>("/api/subjects", user.token)])
+    Promise.all([api.get<ApiClass[]>("/gateway/classes", user.token), api.get<ApiSubject[]>("/gateway/subjects", user.token)])
       .then(([classData, subjectData]) => { setClasses(classData); setSubjects(subjectData); })
       .catch(err => alert(err.message));
   };
@@ -112,16 +112,16 @@ export function ClassSubjectManagementPage() {
   async function saveClass() {
     if (!user?.token) return;
     const body = { ...classForm, academicAdvisor: classForm.academicAdvisor || null };
-    if (modal === "class-add") await api.post("/api/classes", body, user.token);
-    else if (typeof modal === "number") await api.put(`/api/classes/${modal}`, body, user.token);
+    if (modal === "class-add") await api.post("/gateway/classes", body, user.token);
+    else if (typeof modal === "number") await api.put(`/gateway/classes/${modal}`, body, user.token);
     setModal(null); setClassForm(emptyClass); load();
   }
 
   async function saveSubject() {
     if (!user?.token) return;
     const body = { ...subjectForm, credits: Number(subjectForm.credits), teacherId: subjectForm.teacherId ? Number(subjectForm.teacherId) : null };
-    if (modal === "subject-add") await api.post("/api/subjects", body, user.token);
-    else if (typeof modal === "number") await api.put(`/api/subjects/${modal}`, body, user.token);
+    if (modal === "subject-add") await api.post("/gateway/subjects", body, user.token);
+    else if (typeof modal === "number") await api.put(`/gateway/subjects/${modal}`, body, user.token);
     setModal(null); setSubjectForm(emptySubject); load();
   }
 
@@ -141,10 +141,10 @@ export function ClassSubjectManagementPage() {
         </div>
         {tab === "classes" ? <>
           <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}><button style={s.btn("primary")} onClick={() => { setClassForm(emptyClass); setModal("class-add"); }}><Plus size={15} /> Thêm lớp</button></div>
-          <table style={s.table}><thead><tr><th style={s.th}>Mã lớp</th><th style={s.th}>Tên lớp</th><th style={s.th}>Ngành</th><th style={s.th}>Niên khóa</th><th style={s.th}>Thao tác</th></tr></thead><tbody>{classes.map(c => <tr key={c.id}><td style={s.td}>{c.classCode}</td><td style={s.td}>{c.className}</td><td style={s.td}><Badge label={c.major} color={C.teal} /></td><td style={s.td}>{c.academicYear}</td><td style={s.td}><RowActions onEdit={() => { setClassForm(c); setModal(c.id); }} onDelete={() => remove(`/api/classes/${c.id}`)} /></td></tr>)}</tbody></table>
+          <table style={s.table}><thead><tr><th style={s.th}>Mã lớp</th><th style={s.th}>Tên lớp</th><th style={s.th}>Ngành</th><th style={s.th}>Niên khóa</th><th style={s.th}>Thao tác</th></tr></thead><tbody>{classes.map(c => <tr key={c.id}><td style={s.td}>{c.classCode}</td><td style={s.td}>{c.className}</td><td style={s.td}><Badge label={c.major} color={C.teal} /></td><td style={s.td}>{c.academicYear}</td><td style={s.td}><RowActions onEdit={() => { setClassForm(c); setModal(c.id); }} onDelete={() => remove(`/gateway/classes/${c.id}`)} /></td></tr>)}</tbody></table>
         </> : <>
           <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}><button style={s.btn("primary")} onClick={() => { setSubjectForm(emptySubject); setModal("subject-add"); }}><Plus size={15} /> Thêm môn</button></div>
-          <table style={s.table}><thead><tr><th style={s.th}>Mã môn</th><th style={s.th}>Tên môn</th><th style={s.th}>Tín chỉ</th><th style={s.th}>Trạng thái</th><th style={s.th}>Thao tác</th></tr></thead><tbody>{subjects.map(sub => <tr key={sub.id}><td style={s.td}>{sub.subjectCode}</td><td style={s.td}>{sub.subjectName}</td><td style={s.td}>{sub.credits}</td><td style={s.td}>{statusBadge(sub.status || "Mở")}</td><td style={s.td}><RowActions onEdit={() => { setSubjectForm({ subjectCode: sub.subjectCode, subjectName: sub.subjectName, credits: sub.credits, description: sub.description || "", teacherId: sub.teacherId ? String(sub.teacherId) : "", status: sub.status || "Mở" }); setModal(sub.id); }} onDelete={() => remove(`/api/subjects/${sub.id}`)} /></td></tr>)}</tbody></table>
+          <table style={s.table}><thead><tr><th style={s.th}>Mã môn</th><th style={s.th}>Tên môn</th><th style={s.th}>Tín chỉ</th><th style={s.th}>Trạng thái</th><th style={s.th}>Thao tác</th></tr></thead><tbody>{subjects.map(sub => <tr key={sub.id}><td style={s.td}>{sub.subjectCode}</td><td style={s.td}>{sub.subjectName}</td><td style={s.td}>{sub.credits}</td><td style={s.td}>{statusBadge(sub.status || "Mở")}</td><td style={s.td}><RowActions onEdit={() => { setSubjectForm({ subjectCode: sub.subjectCode, subjectName: sub.subjectName, credits: sub.credits, description: sub.description || "", teacherId: sub.teacherId ? String(sub.teacherId) : "", status: sub.status || "Mở" }); setModal(sub.id); }} onDelete={() => remove(`/gateway/subjects/${sub.id}`)} /></td></tr>)}</tbody></table>
         </>}
       </div>
 
@@ -169,23 +169,23 @@ export function StaffCourseRegistrationPage() {
 
   useEffect(() => {
     if (!user?.token) return;
-    Promise.all([api.get<ApiStudent[]>("/api/students", user.token), api.get<ApiSubject[]>("/api/subjects", user.token)]).then(([studentData, subjectData]) => {
+    Promise.all([api.get<ApiStudent[]>("/gateway/students", user.token), api.get<ApiSubject[]>("/gateway/subjects", user.token)]).then(([studentData, subjectData]) => {
       const openSubjects = subjectData.filter(x => (x.status || "Mở") !== "Đóng");
       setStudents(studentData); setSubjects(openSubjects); setSelectedStudent(studentData[0]?.id || 0); setSelectedSubject(openSubjects[0]?.id || 0);
     });
   }, [user?.token]);
 
-  useEffect(() => { if (user?.token && selectedStudent) api.get<ApiEnrollment[]>(`/api/students/${selectedStudent}/subjects`, user.token).then(setRegs).catch(() => setRegs([])); }, [user?.token, selectedStudent]);
+  useEffect(() => { if (user?.token && selectedStudent) api.get<ApiEnrollment[]>(`/gateway/students/${selectedStudent}/subjects`, user.token).then(setRegs).catch(() => setRegs([])); }, [user?.token, selectedStudent]);
 
   async function register() {
     if (!user?.token || !selectedStudent || !selectedSubject) return;
-    await api.post("/api/enrollments", { studentId: selectedStudent, subjectId: selectedSubject, semester }, user.token);
-    setRegs(await api.get<ApiEnrollment[]>(`/api/students/${selectedStudent}/subjects`, user.token));
+    await api.post("/gateway/enrollments", { studentId: selectedStudent, subjectId: selectedSubject, semester }, user.token);
+    setRegs(await api.get<ApiEnrollment[]>(`/gateway/students/${selectedStudent}/subjects`, user.token));
   }
 
   async function cancel(id: number) {
     if (!user?.token) return;
-    await api.delete(`/api/enrollments/${id}`, user.token);
+    await api.delete(`/gateway/enrollments/${id}`, user.token);
     setRegs(prev => prev.filter(x => x.id !== id));
   }
 

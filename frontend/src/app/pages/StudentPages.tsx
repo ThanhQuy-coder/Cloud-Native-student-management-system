@@ -14,11 +14,11 @@ export function StudentCourseRegistrationPage() {
   const [semester, setSemester] = useState("HK1 2026");
   const [regs, setRegs] = useState<ApiEnrollment[]>([]);
 
-  const loadRegs = () => user?.token && api.get<ApiEnrollment[]>("/api/students/me/subjects", user.token).then(setRegs).catch(() => setRegs([]));
+  const loadRegs = () => user?.token && api.get<ApiEnrollment[]>("/gateway/students/me/subjects", user.token).then(setRegs).catch(() => setRegs([]));
 
   useEffect(() => {
     if (!user?.token) return;
-    Promise.all([api.get<ApiSubject[]>("/api/subjects", user.token), api.get<ApiEnrollment[]>("/api/students/me/subjects", user.token)])
+    Promise.all([api.get<ApiSubject[]>("/gateway/subjects", user.token), api.get<ApiEnrollment[]>("/gateway/students/me/subjects", user.token)])
       .then(([subjectData, regData]) => {
         const openSubjects = subjectData.filter(x => (x.status || "Mở") !== "Đóng");
         setSubjects(openSubjects);
@@ -30,7 +30,7 @@ export function StudentCourseRegistrationPage() {
 
   async function register() {
     if (!user?.token || !selectedSubject) return;
-    await api.post("/api/students/me/subjects", { subjectId: selectedSubject, semester }, user.token);
+    await api.post("/gateway/students/me/subjects", { subjectId: selectedSubject, semester }, user.token);
     loadRegs();
   }
 
@@ -46,9 +46,9 @@ export function StudentProfilePage() {
   useEffect(() => {
     if (!user?.token) return;
     Promise.all([
-      api.get<ApiStudent>("/api/students/me", user.token),
-      api.get<ApiEnrollment[]>("/api/students/me/subjects", user.token),
-      api.get<ApiGrade[]>("/api/students/me/grades", user.token)
+      api.get<ApiStudent>("/gateway/students/me", user.token),
+      api.get<ApiEnrollment[]>("/gateway/students/me/subjects", user.token),
+      api.get<ApiGrade[]>("/gateway/students/me/grades", user.token)
     ]).then(([studentData, regData, gradeData]) => {
       setStudent(studentData); setRegs(regData); setGrades(gradeData);
     }).catch(console.error);
@@ -83,7 +83,7 @@ export function StudentProfilePage() {
 export function RegisteredCoursesPage() {
   const { user } = useAuth();
   const [regs, setRegs] = useState<ApiEnrollment[]>([]);
-  useEffect(() => { if (user?.token) api.get<ApiEnrollment[]>("/api/students/me/subjects", user.token).then(setRegs).catch(() => setRegs([])); }, [user?.token]);
+  useEffect(() => { if (user?.token) api.get<ApiEnrollment[]>("/gateway/students/me/subjects", user.token).then(setRegs).catch(() => setRegs([])); }, [user?.token]);
 
   return (
     <Layout>
@@ -98,7 +98,7 @@ export function RegisteredCoursesPage() {
 export function StudentGradesPage() {
   const { user } = useAuth();
   const [grades, setGrades] = useState<ApiGrade[]>([]);
-  useEffect(() => { if (user?.token) api.get<ApiGrade[]>("/api/students/me/grades", user.token).then(setGrades).catch(() => setGrades([])); }, [user?.token]);
+  useEffect(() => { if (user?.token) api.get<ApiGrade[]>("/gateway/students/me/grades", user.token).then(setGrades).catch(() => setGrades([])); }, [user?.token]);
   const gpa = grades.length ? (grades.reduce((sum, g) => sum + Number(g.totalScore || 0), 0) / grades.length / 2.5).toFixed(2) : "0.00";
 
   return (

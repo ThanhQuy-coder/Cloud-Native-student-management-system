@@ -4,9 +4,8 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
-COPY Services/EnrollmentService/EnrollmentService.csproj Services/EnrollmentService/
-RUN dotnet restore Services/EnrollmentService/EnrollmentService.csproj
 COPY . .
+RUN dotnet restore Services/EnrollmentService/EnrollmentService.csproj
 RUN dotnet publish Services/EnrollmentService/EnrollmentService.csproj -c Release -o /app/publish --no-restore
 
 FROM base AS final

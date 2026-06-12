@@ -15,7 +15,7 @@ export function LecturerClassesPage() {
 
   useEffect(() => {
     if (!user?.token) return;
-    api.get<ApiSubject[]>("/api/subjects/my-teaching", user.token)
+    api.get<ApiSubject[]>("/gateway/subjects/my-teaching", user.token)
       .then(setSubjects)
       .catch(() => setSubjects([]));
   }, [user?.token]);
@@ -47,14 +47,14 @@ export function EnterGradesPage() {
 
   useEffect(() => {
     if (!user?.token) return;
-    api.get<ApiStudent[]>("/api/students", user.token)
+    api.get<ApiStudent[]>("/gateway/students", user.token)
       .then(data => { setStudents(data); setSelectedStudent(data[0]?.id || 0); })
       .catch(err => alert(err.message));
   }, [user?.token]);
 
   useEffect(() => {
     if (!user?.token || !selectedStudent) return;
-    api.get<ApiGrade[]>(`/api/students/${selectedStudent}/grades`, user.token)
+    api.get<ApiGrade[]>(`/gateway/students/${selectedStudent}/grades`, user.token)
       .then(data => setGrades(data.map(g => ({
         ...g,
         inputProcess: Number(g.processScore ?? 0),
@@ -72,7 +72,7 @@ export function EnterGradesPage() {
   async function save() {
     if (!user?.token) return;
     for (const grade of grades) {
-      await api.put(`/api/grades/${grade.enrollmentId}`, {
+      await api.put(`/gateway/grades/${grade.enrollmentId}`, {
         processScore: grade.inputProcess,
         midtermScore: grade.inputMidterm,
         finalScore: grade.inputFinal

@@ -1,4 +1,10 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://20.89.102.198:5111";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:7000";
+
+export function apiPath(path: string): string {
+  if (path.startsWith("/gateway/")) return path;
+  if (path.startsWith("/api/")) return `/gateway/${path.slice("/api/".length)}`;
+  return path.startsWith("/") ? path : `/${path}`;
+}
 
 export type Role = "admin" | "giaovu" | "lecturer" | "student";
 
@@ -90,7 +96,7 @@ export function authHeaders(token?: string, json = false): HeadersInit {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${API_BASE_URL}${path}`, options);
+  const res = await fetch(`${API_BASE_URL}${apiPath(path)}`, options);
   if (!res.ok) throw new Error(await res.text() || `API error ${res.status}`);
   if (res.status === 204) return undefined as T;
   return res.json();
