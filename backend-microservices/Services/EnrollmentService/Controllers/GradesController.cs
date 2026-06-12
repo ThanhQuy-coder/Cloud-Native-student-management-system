@@ -11,12 +11,10 @@ namespace EnrollmentService.Controllers;
 public class GradesController : BaseController
 {
     private readonly IGradeService _gradeService;
-    // private readonly IStudentService _studentService;
 
     public GradesController(IGradeService gradeService)
     {
         _gradeService = gradeService;
-        // _studentService = studentService;
     }
 
     /// <summary>
@@ -122,10 +120,13 @@ public class GradesController : BaseController
             if (currentUserId is null)
                 return Unauthorized();
 
-            // var currentStudentId = await _studentService.GetStudentIdByUserIdAsync(currentUserId.Value);
+            var currentStudentId = await _gradeService.GetStudentIdByUserIdAsync(currentUserId.Value);
 
-            // if (currentStudentId != id)
-            //     return Forbid();
+            if (currentStudentId is null)
+                return NotFound("Student profile is not linked to this account.");
+
+            if (currentStudentId.Value != id)
+                return Forbid();
         }
 
         try
@@ -149,13 +150,13 @@ public class GradesController : BaseController
         if (currentUserId is null)
             return Unauthorized();
 
-        // var currentStudentId = await _studentService.GetStudentIdByUserIdAsync(currentUserId.Value);
+        var currentStudentId = await _gradeService.GetStudentIdByUserIdAsync(currentUserId.Value);
 
-        // if (currentStudentId is null)
-        //     return NotFound("Student profile chưa được liên kết với tài khoản.");
+        if (currentStudentId is null)
+            return NotFound("Student profile is not linked to this account.");
 
-        // var grades = await _gradeService.GetGradesByStudentIdAsync(currentStudentId.Value);
+        var grades = await _gradeService.GetGradesByStudentIdAsync(currentStudentId.Value);
 
-        return Ok(); // ! Add grades
+        return Ok(grades);
     }
 }

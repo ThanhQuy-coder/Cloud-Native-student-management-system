@@ -28,6 +28,7 @@ obj/
 
 # ASP.NET Core
 appsettings.Development.json
+!backend-microservices/**/appsettings.Development.json
 
 # User Secrets
 secrets.json
@@ -114,6 +115,7 @@ TestResults/
 
 .env
 .env.*
+!.env.example
 
 node_modules/
 dist/

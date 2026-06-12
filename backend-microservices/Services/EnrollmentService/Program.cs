@@ -23,7 +23,7 @@ builder.Services.AddCors(options =>
 });
 builder.Services.AddDbContext<EnrollmentDbContext>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    var connectionString = GetDefaultConnectionString(builder.Configuration);
 
     options.UseMySql(
         connectionString,
@@ -53,6 +53,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<IEnrollmentService, EnrollmentServiceImp>();
+builder.Services.AddScoped<IGradeService, GradeService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddHostedService<StudentProfileCreatedConsumer>();
@@ -65,10 +66,20 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-// app.UseCors("AllowReactVite");
+app.UseCors("AllowReactVite");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
+
+static string GetDefaultConnectionString(IConfiguration configuration)
+{
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+    if (!string.IsNullOrWhiteSpace(connectionString))
+        return connectionString;
+
+    return $"server={configuration["Database:Host"]};port={configuration["Database:Port"]};database={configuration["Database:Name"]};user={configuration["Database:User"]};password={configuration["Database:Password"]};";
+}

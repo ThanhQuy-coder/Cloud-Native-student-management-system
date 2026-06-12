@@ -5,11 +5,59 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5283
+          "Host": "auth_service",
+          "Port": 80
         }
       ],
       "UpstreamPathTemplate": "/gateway/auth/{everything}",
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
+    },
+    {
+      "DownstreamPathTemplate": "/api/students/{studentPath}/subjects",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "enrollment_service",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/students/{studentPath}/subjects",
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
+    },
+    {
+      "DownstreamPathTemplate": "/api/students/{studentPath}/grades",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "enrollment_service",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/students/{studentPath}/grades",
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
+    },
+    {
+      "DownstreamPathTemplate": "/api/enrollments/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "enrollment_service",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/enrollments/{everything}",
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
+    },
+    {
+      "DownstreamPathTemplate": "/api/grades/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "enrollment_service",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/grades/{everything}",
       "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
     },
     {
@@ -17,8 +65,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5190
+          "Host": "student_service",
+          "Port": 80
         }
       ],
       "UpstreamPathTemplate": "/gateway/students/{everything}",
@@ -29,8 +77,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5190
+          "Host": "student_service",
+          "Port": 80
         }
       ],
       "UpstreamPathTemplate": "/gateway/classes/{everything}",
@@ -41,8 +89,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5160
+          "Host": "academic_service",
+          "Port": 80
         }
       ],
       "UpstreamPathTemplate": "/gateway/subjects/{everything}",

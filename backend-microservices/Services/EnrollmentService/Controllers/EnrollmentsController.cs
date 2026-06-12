@@ -144,8 +144,6 @@ public class EnrollmentsController : BaseController
         if (currentUserId is null)
             return Unauthorized();
 
-        //     return NotFound("Student profile chưa được liên kết với tài khoản.");
-
         var currentStudentId = await _enrollmentService.GetStudentIdByUserIdAsync(currentUserId.Value);
 
         if (currentStudentId is null)

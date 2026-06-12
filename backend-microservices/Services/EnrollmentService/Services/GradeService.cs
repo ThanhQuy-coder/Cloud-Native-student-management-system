@@ -2,16 +2,21 @@ using EnrollmentService.Data;
 using EnrollmentService.DTOs;
 using EnrollmentService.Models;
 using EnrollmentService.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace EnrollmentService.Services;
 
 public class GradeService : IGradeService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly EnrollmentDbContext _dbContext;
 
-    public GradeService(IUnitOfWork unitOfWork)
+    public GradeService(
+        IUnitOfWork unitOfWork,
+        EnrollmentDbContext dbContext)
     {
         _unitOfWork = unitOfWork;
+        _dbContext = dbContext;
     }
 
     /// <summary>
@@ -121,6 +126,14 @@ public class GradeService : IGradeService
         var enrollments = await _unitOfWork.Enrollments.GetGradesByStudentIdAsync(studentId);
 
         return enrollments.Select(MapToGradeDto).ToList();
+    }
+
+    public async Task<int?> GetStudentIdByUserIdAsync(int userId)
+    {
+        return await _dbContext.StudentReferences
+            .Where(x => x.UserId == userId)
+            .Select(x => (int?)x.StudentId)
+            .FirstOrDefaultAsync();
     }
 
     /// <summary>
