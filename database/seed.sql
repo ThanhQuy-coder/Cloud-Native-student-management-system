@@ -63,9 +63,9 @@ INSERT INTO `Students` (`Id`, `StudentCode`, `FullName`, `Email`, `Dob`, `Gender
 -- 4. SEED ENROLLMENT SERVICE
 USE `student_management_enrollment`;
 DELETE FROM `Enrollments`;
-DELETE FROM `StudentReferences`;
+DELETE FROM `Student_References`;
 ALTER TABLE `Enrollments` AUTO_INCREMENT = 1;
-ALTER TABLE `StudentReferences` AUTO_INCREMENT = 1;
+ALTER TABLE `Student_References` AUTO_INCREMENT = 1;
 
 INSERT INTO `Enrollments` (`Id`, `StudentId`, `CourseId`, `Semester`, `Status`, `ProcessScore`, `MidtermScore`, `FinalScore`, `TotalScore`, `GradeStatus`) VALUES
 (1, 1, 1, 'HK1 2025', 'Đang học', 8.50, 7.00, 9.00, 8.30, 'Đạt'),
@@ -85,7 +85,7 @@ INSERT INTO `Enrollments` (`Id`, `StudentId`, `CourseId`, `Semester`, `Status`, 
 (15, 8, 5, 'HK1 2026', 'Đang học', NULL, NULL, NULL, NULL, 'Chưa có điểm');
 
 -- Đồng bộ trước dữ liệu vào bảng StudentReferences để phục vụ hiển thị thông tin sinh viên ở phân hệ điểm
-INSERT INTO `StudentReferences` (`Id`, `UserId`, `StudentId`, `StudentCode`) VALUES
+INSERT INTO `Student_References` (`Id`, `UserId`, `StudentId`, `StudentCode`) VALUES
 (1, 5, 1, 'SV001'), (2, 6, 2, 'SV002'), (3, 7, 3, 'SV003'), (4, 8, 4, 'SV004'), (5, 9, 5, 'SV005');
 
 SET FOREIGN_KEY_CHECKS = 1;

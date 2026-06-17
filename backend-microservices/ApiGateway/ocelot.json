@@ -37,6 +37,18 @@
       "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
     },
     {
+      "DownstreamPathTemplate": "/api/students/me/subjects",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "enrollment_service",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/students/me/subjects",
+      "UpstreamHttpMethod": ["GET", "POST"]
+    },
+    {
       "DownstreamPathTemplate": "/api/students/{studentPath}/subjects",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [

@@ -65,6 +65,8 @@ public class EnrollmentsController : BaseController
         if (currentUserId is null)
             return Unauthorized();
 
+        Console.WriteLine($"==> {currentUserId.Value}");
+
         var currentStudentId = await _enrollmentService.GetStudentIdByUserIdAsync(currentUserId.Value);
 
         if (currentStudentId is null)

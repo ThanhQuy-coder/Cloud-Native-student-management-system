@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { BookOpen, Users } from "lucide-react";
 import { useNavigate } from "react-router";
-import { api, ApiGrade, ApiStudent, ApiSubject } from "../api";
+import { api, ApiGrade, ApiStudent, ApiSubject, enrichGradesWithSubjects } from "../api";
 import { useAuth } from "../auth";
 import Badge from "../components/Badge";
 import Layout from "../components/Layout";
-import { calcTK, xepLoai } from "../utils";
+import { xepLoai } from "../utils";
 import { C, s } from "../theme";
+
+function calcTotal(process: number, midterm: number, final: number) {
+  return Math.round((process * 0.2 + midterm * 0.3 + final * 0.5) * 100) / 100;
+}
 
 export function LecturerClassesPage() {
   const { user } = useAuth();
@@ -42,27 +46,33 @@ export function LecturerClassesPage() {
 export function EnterGradesPage() {
   const { user } = useAuth();
   const [students, setStudents] = useState<ApiStudent[]>([]);
+  const [subjects, setSubjects] = useState<ApiSubject[]>([]);
   const [selectedStudent, setSelectedStudent] = useState(0);
   const [grades, setGrades] = useState<(ApiGrade & { inputProcess: number; inputMidterm: number; inputFinal: number })[]>([]);
 
   useEffect(() => {
     if (!user?.token) return;
-    api.get<ApiStudent[]>("/gateway/students", user.token)
-      .then(data => { setStudents(data); setSelectedStudent(data[0]?.id || 0); })
-      .catch(err => alert(err.message));
+    Promise.all([
+      api.get<ApiStudent[]>("/gateway/students", user.token),
+      api.get<ApiSubject[]>("/gateway/subjects", user.token)
+    ]).then(([studentData, subjectData]) => {
+      setStudents(studentData);
+      setSubjects(subjectData);
+      setSelectedStudent(studentData[0]?.id || 0);
+    }).catch(err => alert(err.message));
   }, [user?.token]);
 
   useEffect(() => {
     if (!user?.token || !selectedStudent) return;
     api.get<ApiGrade[]>(`/gateway/students/${selectedStudent}/grades`, user.token)
-      .then(data => setGrades(data.map(g => ({
+      .then(data => setGrades(enrichGradesWithSubjects(data, subjects).map(g => ({
         ...g,
         inputProcess: Number(g.processScore ?? 0),
         inputMidterm: Number(g.midtermScore ?? 0),
         inputFinal: Number(g.finalScore ?? 0)
       }))))
       .catch(() => setGrades([]));
-  }, [user?.token, selectedStudent]);
+  }, [user?.token, selectedStudent, subjects]);
 
   function update(id: number, field: "inputProcess" | "inputMidterm" | "inputFinal", value: string) {
     const num = Math.min(10, Math.max(0, Number(value) || 0));
@@ -91,13 +101,13 @@ export function EnterGradesPage() {
           <button style={s.btn("primary")} onClick={save}>Lưu điểm</button>
         </div>
         <table style={s.table}>
-          <thead><tr><th style={s.th}>Môn học</th><th style={s.th}>Học kỳ</th><th style={s.th}>QT</th><th style={s.th}>GK</th><th style={s.th}>CK</th><th style={s.th}>TK</th><th style={s.th}>Xếp loại</th></tr></thead>
+          <thead><tr><th style={s.th}>Mã môn</th><th style={s.th}>Môn học</th><th style={s.th}>Học kỳ</th><th style={s.th}>QT</th><th style={s.th}>GK</th><th style={s.th}>CK</th><th style={s.th}>TK</th><th style={s.th}>Xếp loại</th></tr></thead>
           <tbody>
             {grades.map(g => {
-              const total = calcTK(g.inputMidterm, g.inputFinal);
-              return <tr key={g.enrollmentId}><td style={s.td}>{g.subjectName}</td><td style={s.td}>{g.semester}</td><td style={s.td}><Score value={g.inputProcess} onChange={v => update(g.enrollmentId, "inputProcess", v)} /></td><td style={s.td}><Score value={g.inputMidterm} onChange={v => update(g.enrollmentId, "inputMidterm", v)} /></td><td style={s.td}><Score value={g.inputFinal} onChange={v => update(g.enrollmentId, "inputFinal", v)} /></td><td style={{ ...s.td, fontWeight: 700 }}>{total}</td><td style={s.td}><Badge label={xepLoai(total)} color={total >= 4 ? C.success : C.danger} /></td></tr>;
+              const total = calcTotal(g.inputProcess, g.inputMidterm, g.inputFinal);
+              return <tr key={g.enrollmentId}><td style={s.td}>{g.subjectCode}</td><td style={s.td}>{g.subjectName}</td><td style={s.td}>{g.semester}</td><td style={s.td}><Score value={g.inputProcess} onChange={v => update(g.enrollmentId, "inputProcess", v)} /></td><td style={s.td}><Score value={g.inputMidterm} onChange={v => update(g.enrollmentId, "inputMidterm", v)} /></td><td style={s.td}><Score value={g.inputFinal} onChange={v => update(g.enrollmentId, "inputFinal", v)} /></td><td style={{ ...s.td, fontWeight: 700 }}>{total}</td><td style={s.td}><Badge label={xepLoai(total)} color={total >= 4 ? C.success : C.danger} /></td></tr>;
             })}
-            {grades.length === 0 && <tr><td colSpan={7} style={{ ...s.td, textAlign: "center", color: C.textSecondary, padding: 24 }}>Sinh viên chưa có môn đăng ký.</td></tr>}
+            {grades.length === 0 && <tr><td colSpan={8} style={{ ...s.td, textAlign: "center", color: C.textSecondary, padding: 24 }}>Sinh viên chưa có môn đăng ký.</td></tr>}
           </tbody>
         </table>
       </div>

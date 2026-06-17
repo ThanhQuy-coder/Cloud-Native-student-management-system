@@ -2,13 +2,22 @@ import React, { useEffect, useState } from "react";
 import { BookOpen, Building2, Pencil, Plus, Search, Shield, Trash2, Users } from "lucide-react";
 import { api, ApiClass, ApiStudent, ApiSubject, ApiUser, backendRole, normalizeRole, Role } from "../api";
 import { useAuth } from "../auth";
-import Badge, { roleBadge, statusBadge } from "../components/Badge";
+import { roleBadge, statusBadge } from "../components/Badge";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import StatCard from "../components/StatCard";
 import { C, s } from "../theme";
 
-const emptyAccount = { username: "", password: "", role: "student" as Role, isActive: true };
+const emptyAccount = {
+  username: "",
+  password: "",
+  role: "student" as Role,
+  isActive: true,
+  fullName: "",
+  email: "",
+  dob: "",
+  gender: "Nam"
+};
 
 export function AdminDashboard() {
   const { user } = useAuth();
@@ -78,22 +87,47 @@ export function AccountManagement() {
   useEffect(() => { load(); }, [user?.token]);
 
   const filtered = list.filter(a => a.username.toLowerCase().includes(search.toLowerCase()) || a.roleName.toLowerCase().includes(search.toLowerCase()));
+  const isAddingStudent = modal === "add" && form.role === "student";
 
   function openEdit(account: ApiUser) {
-    setForm({ username: account.username, password: "", role: normalizeRole(account.roleName), isActive: account.isActive });
+    setForm({ ...emptyAccount, username: account.username, password: "", role: normalizeRole(account.roleName), isActive: account.isActive });
     setModal(account.id);
   }
 
   async function save() {
     if (!user?.token || !form.username.trim()) return;
-    const body = { username: form.username.trim(), password: form.password || undefined, roleName: backendRole(form.role), isActive: form.isActive };
+    if (modal === "add" && !form.password.trim()) return alert("Mật khẩu là bắt buộc khi tạo tài khoản.");
+
     try {
-      if (modal === "add") {
-        if (!form.password.trim()) return alert("Mật khẩu là bắt buộc khi tạo tài khoản.");
-        await api.post("/gateway/users", { ...body, password: form.password }, user.token);
+      if (modal === "add" && form.role === "student") {
+        if (!form.fullName.trim() || !form.email.trim() || !form.dob || !form.gender) {
+          return alert("Vui lòng nhập đủ Username, Password, FullName, Email, Dob và Gender.");
+        }
+
+        await api.post("/gateway/auth/register-student", {
+          username: form.username.trim(),
+          password: form.password,
+          fullName: form.fullName.trim(),
+          email: form.email.trim(),
+          dob: form.dob,
+          gender: form.gender
+        }, user.token);
+      } else if (modal === "add") {
+        await api.post("/gateway/users", {
+          username: form.username.trim(),
+          password: form.password,
+          roleName: backendRole(form.role),
+          isActive: form.isActive
+        }, user.token);
       } else if (typeof modal === "number") {
-        await api.put(`/gateway/users/${modal}`, body, user.token);
+        await api.put(`/gateway/users/${modal}`, {
+          username: form.username.trim(),
+          password: form.password || undefined,
+          roleName: backendRole(form.role),
+          isActive: form.isActive
+        }, user.token);
       }
+
       setModal(null);
       setForm(emptyAccount);
       load();
@@ -142,12 +176,22 @@ export function AccountManagement() {
 
       {modal !== null && (
         <Modal title={modal === "add" ? "Thêm tài khoản" : "Chỉnh sửa tài khoản"} onClose={() => setModal(null)}>
-          <div style={s.formGroup}><label style={s.label}>Tên đăng nhập</label><input style={s.input} value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} /></div>
-          <div style={s.formGroup}><label style={s.label}>Mật khẩu {modal !== "add" && "(để trống nếu không đổi)"}</label><input type="password" style={s.input} value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} /></div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+          <div style={s.formGroup}><label style={s.label}>Username</label><input style={s.input} value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} /></div>
+          <div style={s.formGroup}><label style={s.label}>Password {modal !== "add" && "(để trống nếu không đổi)"}</label><input type="password" style={s.input} value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} /></div>
+          <div style={{ display: "grid", gridTemplateColumns: isAddingStudent ? "1fr" : "1fr 1fr", gap: 12, marginBottom: 16 }}>
             <div><label style={s.label}>Vai trò</label><select style={{ ...s.select, width: "100%" }} value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value as Role }))}><option value="admin">Admin</option><option value="giaovu">Giáo vụ</option><option value="lecturer">Giảng viên</option><option value="student">Sinh viên</option></select></div>
-            <div><label style={s.label}>Trạng thái</label><select style={{ ...s.select, width: "100%" }} value={String(form.isActive)} onChange={e => setForm(f => ({ ...f, isActive: e.target.value === "true" }))}><option value="true">Hoạt động</option><option value="false">Không hoạt động</option></select></div>
+            {!isAddingStudent && <div><label style={s.label}>Trạng thái</label><select style={{ ...s.select, width: "100%" }} value={String(form.isActive)} onChange={e => setForm(f => ({ ...f, isActive: e.target.value === "true" }))}><option value="true">Hoạt động</option><option value="false">Không hoạt động</option></select></div>}
           </div>
+
+          {isAddingStudent && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+              <div><label style={s.label}>FullName</label><input style={s.input} value={form.fullName} onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))} /></div>
+              <div><label style={s.label}>Email</label><input type="email" style={s.input} value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
+              <div><label style={s.label}>Dob</label><input type="date" style={s.input} value={form.dob} onChange={e => setForm(f => ({ ...f, dob: e.target.value }))} /></div>
+              <div><label style={s.label}>Gender</label><select style={{ ...s.select, width: "100%" }} value={form.gender} onChange={e => setForm(f => ({ ...f, gender: e.target.value }))}><option>Nam</option><option>Nữ</option></select></div>
+            </div>
+          )}
+
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}><button style={s.btn("outline")} onClick={() => setModal(null)}>Hủy</button><button style={s.btn("primary")} onClick={save}>Lưu</button></div>
         </Modal>
       )}

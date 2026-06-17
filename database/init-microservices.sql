@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS `Enrollments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Thêm bảng ẩn lưu vết mapping sinh viên trong Enrollment Service
-CREATE TABLE IF NOT EXISTS `StudentReferences` (
+CREATE TABLE IF NOT EXISTS `Student_References` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `UserId` int(11) NOT NULL,
   `StudentId` int(11) NOT NULL,

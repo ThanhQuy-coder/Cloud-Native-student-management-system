@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Pencil, Plus, Search, Trash2 } from "lucide-react";
-import { api, ApiClass, ApiEnrollment, ApiStudent, ApiSubject } from "../api";
+import {
+  api,
+  ApiClass,
+  ApiEnrollment,
+  ApiStudent,
+  ApiSubject,
+  enrichEnrollmentsWithSubjects,
+  isOpenSubject
+} from "../api";
 import { useAuth } from "../auth";
 import Badge, { statusBadge } from "../components/Badge";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import { C, s } from "../theme";
 
-const emptyStudent = { studentCode: "", fullName: "", email: "", dob: "", gender: "Nam", phone: "", classId: "", learningStatus: "Đang học" };
+const emptyStudent = { username: "", password: "", studentCode: "", fullName: "", email: "", dob: "", gender: "Nam", phone: "", classId: "", learningStatus: "Đang học" };
 const emptyClass = { classCode: "", className: "", major: "CNTT", academicYear: "2024-2028", academicAdvisor: "" };
 const emptySubject = { subjectCode: "", subjectName: "", credits: 3, description: "", teacherId: "", status: "Mở" };
 
@@ -30,26 +38,36 @@ export function StudentManagementPage() {
   const filtered = students.filter(st => `${st.studentCode} ${st.fullName} ${st.email}`.toLowerCase().includes(search.toLowerCase()));
 
   function openEdit(st: ApiStudent) {
-    setForm({ studentCode: st.studentCode, fullName: st.fullName, email: st.email, dob: st.dob, gender: st.gender, phone: st.phone || "", classId: String(st.classId || ""), learningStatus: st.learningStatus });
+    setForm({ username: "", password: "", studentCode: st.studentCode, fullName: st.fullName, email: st.email, dob: st.dob, gender: st.gender, phone: st.phone || "", classId: String(st.classId || ""), learningStatus: st.learningStatus });
     setModal(st.id);
   }
 
   async function save() {
-    if (!user?.token || !form.fullName.trim() || !form.email.trim()) return;
-    const body = {
-      studentCode: form.studentCode.trim(),
-      fullName: form.fullName.trim(),
-      email: form.email.trim(),
-      dob: form.dob,
-      gender: form.gender,
-      phone: form.phone,
-      classId: form.classId ? Number(form.classId) : null,
-      learningStatus: form.learningStatus,
-      userId: null
-    };
+    if (!user?.token || !form.fullName.trim() || !form.email.trim() || !form.dob || !form.gender) return;
+    if (modal === "add" && (!form.username.trim() || !form.password.trim())) return;
+
     try {
-      if (modal === "add") await api.post("/gateway/students", body, user.token);
-      else if (typeof modal === "number") await api.put(`/gateway/students/${modal}`, body, user.token);
+      if (modal === "add") {
+        await api.post("/gateway/auth/register-student", {
+          username: form.username.trim(),
+          password: form.password,
+          fullName: form.fullName.trim(),
+          email: form.email.trim(),
+          dob: form.dob,
+          gender: form.gender
+        }, user.token);
+      } else if (typeof modal === "number") {
+        await api.put(`/gateway/students/${modal}`, {
+          fullName: form.fullName.trim(),
+          email: form.email.trim(),
+          dob: form.dob,
+          gender: form.gender,
+          phone: form.phone,
+          classId: form.classId ? Number(form.classId) : null,
+          learningStatus: form.learningStatus
+        }, user.token);
+      }
+
       setModal(null);
       setForm(emptyStudent);
       load();
@@ -77,14 +95,16 @@ export function StudentManagementPage() {
 
       {modal !== null && <Modal title={modal === "add" ? "Thêm sinh viên" : "Cập nhật sinh viên"} onClose={() => setModal(null)}>
         <Grid>
-          <Field label="MSSV"><input style={s.input} value={form.studentCode} disabled={modal !== "add"} onChange={e => setForm(f => ({ ...f, studentCode: e.target.value }))} /></Field>
+          {modal === "add" && <Field label="Username"><input style={s.input} value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} /></Field>}
+          {modal === "add" && <Field label="Password"><input type="password" style={s.input} value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} /></Field>}
+          {modal !== "add" && <Field label="MSSV"><input style={s.input} value={form.studentCode} disabled onChange={e => setForm(f => ({ ...f, studentCode: e.target.value }))} /></Field>}
           <Field label="Họ tên"><input style={s.input} value={form.fullName} onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))} /></Field>
           <Field label="Email"><input style={s.input} value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></Field>
           <Field label="Ngày sinh"><input type="date" style={s.input} value={form.dob} onChange={e => setForm(f => ({ ...f, dob: e.target.value }))} /></Field>
           <Field label="Giới tính"><select style={s.select} value={form.gender} onChange={e => setForm(f => ({ ...f, gender: e.target.value }))}><option>Nam</option><option>Nữ</option></select></Field>
-          <Field label="Lớp"><select style={s.select} value={form.classId} onChange={e => setForm(f => ({ ...f, classId: e.target.value }))}><option value="">Chưa phân lớp</option>{classes.map(c => <option key={c.id} value={c.id}>{c.classCode} - {c.className}</option>)}</select></Field>
-          <Field label="SĐT"><input style={s.input} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></Field>
-          <Field label="Trạng thái"><select style={s.select} value={form.learningStatus} onChange={e => setForm(f => ({ ...f, learningStatus: e.target.value }))}><option>Đang học</option><option>Bảo lưu</option><option>Tốt nghiệp</option><option>Thôi học</option></select></Field>
+          {modal !== "add" && <Field label="Lớp"><select style={s.select} value={form.classId} onChange={e => setForm(f => ({ ...f, classId: e.target.value }))}><option value="">Chưa phân lớp</option>{classes.map(c => <option key={c.id} value={c.id}>{c.classCode} - {c.className}</option>)}</select></Field>}
+          {modal !== "add" && <Field label="SĐT"><input style={s.input} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></Field>}
+          {modal !== "add" && <Field label="Trạng thái"><select style={s.select} value={form.learningStatus} onChange={e => setForm(f => ({ ...f, learningStatus: e.target.value }))}><option>Đang học</option><option>Bảo lưu</option><option>Tốt nghiệp</option><option>Thôi học</option></select></Field>}
         </Grid>
         <Actions onCancel={() => setModal(null)} onSave={save} />
       </Modal>}
@@ -162,6 +182,7 @@ export function StaffCourseRegistrationPage() {
   const { user } = useAuth();
   const [students, setStudents] = useState<ApiStudent[]>([]);
   const [subjects, setSubjects] = useState<ApiSubject[]>([]);
+  const [allSubjects, setAllSubjects] = useState<ApiSubject[]>([]);
   const [selectedStudent, setSelectedStudent] = useState(0);
   const [selectedSubject, setSelectedSubject] = useState(0);
   const [semester, setSemester] = useState("HK1 2026");
@@ -170,17 +191,27 @@ export function StaffCourseRegistrationPage() {
   useEffect(() => {
     if (!user?.token) return;
     Promise.all([api.get<ApiStudent[]>("/gateway/students", user.token), api.get<ApiSubject[]>("/gateway/subjects", user.token)]).then(([studentData, subjectData]) => {
-      const openSubjects = subjectData.filter(x => (x.status || "Mở") !== "Đóng");
-      setStudents(studentData); setSubjects(openSubjects); setSelectedStudent(studentData[0]?.id || 0); setSelectedSubject(openSubjects[0]?.id || 0);
+      const openSubjects = subjectData.filter(isOpenSubject);
+      setStudents(studentData);
+      setAllSubjects(subjectData);
+      setSubjects(openSubjects);
+      setSelectedStudent(studentData[0]?.id || 0);
+      setSelectedSubject(openSubjects[0]?.id || 0);
     });
   }, [user?.token]);
 
-  useEffect(() => { if (user?.token && selectedStudent) api.get<ApiEnrollment[]>(`/gateway/students/${selectedStudent}/subjects`, user.token).then(setRegs).catch(() => setRegs([])); }, [user?.token, selectedStudent]);
+  useEffect(() => {
+    if (!user?.token || !selectedStudent) return;
+    api.get<ApiEnrollment[]>(`/gateway/students/${selectedStudent}/subjects`, user.token)
+      .then(data => setRegs(enrichEnrollmentsWithSubjects(data, allSubjects)))
+      .catch(() => setRegs([]));
+  }, [user?.token, selectedStudent, allSubjects]);
 
   async function register() {
     if (!user?.token || !selectedStudent || !selectedSubject) return;
     await api.post("/gateway/enrollments", { studentId: selectedStudent, subjectId: selectedSubject, semester }, user.token);
-    setRegs(await api.get<ApiEnrollment[]>(`/gateway/students/${selectedStudent}/subjects`, user.token));
+    const data = await api.get<ApiEnrollment[]>(`/gateway/students/${selectedStudent}/subjects`, user.token);
+    setRegs(enrichEnrollmentsWithSubjects(data, allSubjects));
   }
 
   async function cancel(id: number) {
@@ -203,7 +234,13 @@ function RegistrationView(props: { title: string; students?: ApiStudent[]; subje
           <Field label="Học kỳ"><input style={s.input} value={props.semester} onChange={e => props.setSemester(e.target.value)} /></Field>
           <button style={{ ...s.btn("primary"), height: 38 }} onClick={props.register}>Đăng ký</button>
         </div>
-        <table style={s.table}><thead><tr><th style={s.th}>Mã môn</th><th style={s.th}>Tên môn</th><th style={s.th}>Tín chỉ</th><th style={s.th}>Học kỳ</th><th style={s.th}>Trạng thái</th><th style={s.th}>Thao tác</th></tr></thead><tbody>{props.regs.map(r => <tr key={r.id}><td style={s.td}>{r.subjectCode}</td><td style={s.td}>{r.subjectName}</td><td style={s.td}>{r.credits}</td><td style={s.td}>{r.semester}</td><td style={s.td}>{statusBadge(r.status)}</td><td style={s.td}>{props.cancel ? <button style={{ ...s.btn("ghost"), color: C.danger }} onClick={() => props.cancel?.(r.id)}><Trash2 size={15} /></button> : "-"}</td></tr>)}</tbody></table>
+        <table style={s.table}>
+          <thead><tr><th style={s.th}>Mã môn</th><th style={s.th}>Tên môn</th><th style={s.th}>Tín chỉ</th><th style={s.th}>Học kỳ</th><th style={s.th}>Trạng thái</th><th style={s.th}>Thao tác</th></tr></thead>
+          <tbody>
+            {props.regs.map(r => <tr key={r.id}><td style={s.td}>{r.subjectCode}</td><td style={s.td}>{r.subjectName}</td><td style={s.td}>{r.credits}</td><td style={s.td}>{r.semester}</td><td style={s.td}>{statusBadge(r.status)}</td><td style={s.td}>{props.cancel ? <button style={{ ...s.btn("ghost"), color: C.danger }} onClick={() => props.cancel?.(r.id)}><Trash2 size={15} /></button> : "-"}</td></tr>)}
+            {props.regs.length === 0 && <tr><td colSpan={6} style={{ ...s.td, textAlign: "center", color: C.textSecondary, padding: 24 }}>Chưa có môn học đã đăng ký.</td></tr>}
+          </tbody>
+        </table>
       </div>
     </Layout>
   );
